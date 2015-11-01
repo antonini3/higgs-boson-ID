@@ -11,7 +11,7 @@ from sklearn.metrics import accuracy_score, roc_auc_score
 
 def classify(clf):
 	x, y = preprocessing()
-	x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25)
+	x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=TEST_SET_RATIO)
 	clf.fit(x_train, y_train)
 	y_hat = clf.predict(x_test)
 
@@ -34,6 +34,6 @@ def preprocessing():
 
 if __name__ == '__main__':
 	#classify(LogisticRegression(verbose=1, max_iter=1000))
-	classify(svm.SVC(verbose=1, kernel='poly'))
-	#classify(ExtraTreesClassifier(n_estimators=500, verbose=1))
+	# classify(svm.SVC(verbose=1, kernel='poly', max_iter=100000000))
+	classify(ExtraTreesClassifier(n_estimators=1500, verbose=1))
 
