@@ -9,18 +9,22 @@ from sklearn.ensemble import ExtraTreesClassifier
 
 from sklearn.metrics import accuracy_score, roc_auc_score
 
-def classify(clf):
-	x, y = preprocessing()
-	x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=TEST_SET_RATIO)
+def classify(clf, train_size=None):
+	x, y = preprocessing(train_size)
+	x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=TEST_SET_RATIO, random_state=42)
 	clf.fit(x_train, y_train)
 	y_hat = clf.predict(x_test)
+	accuracy_test = accuracy_score(y_test, y_hat)
 
-	print "Accuracy is: {0}".format(accuracy_score(y_test, y_hat))
-	plot_roc(y_test, y_hat)
+	y_hat_train = clf.predict(x_train)
+	accuracy_train =accuracy_score(y_train, y_hat_train)
+	print "Accuracy is: {0}".format(accuracy_test)
+	# plot_roc(y_test, y_hat)
+	return accuracy_test, accuracy_train
 
 
 
-def preprocessing():
+def preprocessing(train_size=None):
 	higgs_data = read_data(HIGGS_FILE_NAME)
 	not_higgs_data = read_data(NOT_HIGGS_FILE_NAME)
 
@@ -29,11 +33,26 @@ def preprocessing():
 
 	all_data = permute_arrays(higgs_data, not_higgs_data)
 
+	if train_size is not None and train_size < len(all_data) and train_size > 0:
+		all_data = all_data[:train_size]
+
 	x, y = zip(*all_data)
 	return x, y
 
+def error_plotting():
+	all_size = [100, 500, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000]
+	# all_size = [50,100]
+	train_size = [elem * (1 - TEST_SET_RATIO) for elem in all_size]
+	errors = [classify(ExtraTreesClassifier(n_estimators=500, verbose=1), size) for size in all_size]
+	test_error, train_error = zip(*errors)
+	plot_error(train_size, test_error, train_error)
+
+
+
+
 if __name__ == '__main__':
+	error_plotting()
 	#classify(LogisticRegression(verbose=1, max_iter=1000))
 	# classify(svm.SVC(verbose=1, kernel='poly', max_iter=100000000))
-	classify(ExtraTreesClassifier(n_estimators=1500, verbose=1))
+	# classify(ExtraTreesClassifier(n_estimators=300, verbose=1))
 

@@ -16,7 +16,7 @@ def visualize_plot(arr):
 
 
 def array_to_matrix(arr):
-	return [[arr[i * 25 + j] for j in range(NUM_PIXELS)] for i in range(NUM_PIXELS)]
+	return [[arr[i * NUM_PIXELS + j] for j in range(NUM_PIXELS)] for i in range(NUM_PIXELS)]
 
 def array_to_numpy_matrix(arr):
 	return np.matrix(array_to_matrix(arr)).astype(float)
@@ -41,7 +41,14 @@ def plot_roc(y_test, y_hat):
 	plt.legend(loc="lower right")
 	plt.show()
 
+def plot_error(x, first_error, second_error=None):
+	plt.figure()
+	plt.plot(x, first_error)
+	if second_error is not None:
+		plt.plot(x, second_error)
+	plt.show()
+
 if __name__ == '__main__':
-	higgs_file_data = read_data(HIGGS_FILE_NAME)
+	higgs_file_data = read_data(NOT_HIGGS_FILE_NAME)
 	visualize_plot(higgs_file_data[0])
 	
