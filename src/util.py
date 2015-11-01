@@ -67,3 +67,4 @@ if __name__ == '__main__':
 	# higgs_file_data = read_data(NOT_HIGGS_FILE_NAME)
 	# visualize_plot(higgs_file_data[0])
 	convert_all_to_jpg()
+
