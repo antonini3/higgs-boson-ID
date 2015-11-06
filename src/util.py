@@ -17,7 +17,6 @@ def visualize_plot(arr):
 	plt.imshow(matrix)
 	plt.show()
 
-
 def array_to_matrix(arr):
 	return [[arr[i * NUM_PIXELS + j] for j in range(NUM_PIXELS)] for i in range(NUM_PIXELS)]
 
@@ -27,22 +26,39 @@ def array_to_numpy_matrix(arr):
 def read_data(filename):
 	return np.asarray([np.asarray(x.split()).astype(float) for x in open(filename)])
 
+def read_data_without_pull(filename):
+	if 'withpull' in filename:
+ 		return np.asarray([np.asarray(x.split()).astype(float)[2:] for x in open(filename)])
+ 	else:
+ 		print "No pull in this file"
+
+def read_pull(filename):
+	if 'withpull' in filename:
+		return np.asarray([np.asarray(x.split()).astype(float)[:2] for x in open(filename)])
+	else:
+		print "No pull in this file"
+
 def permute_arrays(arr1, arr2):
 	return np.random.permutation(np.concatenate((arr1, arr2)))
 
-def plot_roc(y_test, y_probs):
-	print y_probs
+def setup_figure():
+	plt.figure()
+
+def plot_roc(y_test, y_probs, name):
 	fpr, tpr, threshold = roc_curve(y_test, y_probs[:,1])
 	roc_auc = auc(fpr, tpr)
-	plt.figure()
-	plt.plot(fpr, tpr, label='ROC curve (area = %0.2f)' % roc_auc)
-	plt.plot([0, 1], [0, 1], 'k--')
-	plt.xlim([0.0, 1.0])
-	plt.ylim([0.0, 1.05])
-	plt.xlabel('False Positive Rate')
-	plt.ylabel('True Positive Rate')
-	plt.title('Receiver operating characteristic example')
-	plt.legend(loc="lower right")
+	plt.plot(tpr, 1/fpr, label=name + ' (area = %0.2f)' % roc_auc)
+	x = np.arange(0, 1, 0.001)
+	y = 1/x
+	plt.plot(x, y, 'k--')
+	plt.xlim([0.2, 0.8])
+	plt.ylim([0.0, 100])
+	plt.xlabel('Signal Efficiency')
+	plt.ylabel('1/(Background Efficiency)')
+	plt.title('Higgs Boson Receiver Operating Characteristics')
+	plt.legend(loc="upper right")
+
+def plot_show():
 	plt.show()
 
 def plot_error(x, first_error, second_error=None):
