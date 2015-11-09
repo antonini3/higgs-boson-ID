@@ -61,13 +61,8 @@ def read_data_without_pull(filename):
 				l.append(np.asarray(x.split()).astype(float)[5:])
 				sys.stdout.write("Progress from {0}: {1} \r".format(filename, i))
 				sys.stdout.flush()
-<<<<<<< HEAD
-				# if i > 30000:
-				# 	break
-=======
 				if i > M:
 					break
->>>>>>> f30f71b4cfa759c157535198e41e0af5f55e80d0
 		return np.asarray(l)
 
 	elif 'withpull' in filename:
