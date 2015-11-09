@@ -31,6 +31,23 @@ def array_to_matrix(arr):
 def array_to_numpy_matrix(arr):
 	return np.matrix(array_to_matrix(arr)).astype(float)
 
+def get_data(pull=False, fine=False):
+	if pull is False:
+		if fine is True:
+			higgs_data = read_data_without_pull(FINE_HIGGS_FILE_NAME_W_PULL)
+			not_higgs_data = read_data_without_pull(FINE_NOT_HIGGS_FILE_NAME_W_PULL)
+		else:
+			higgs_data = read_data_without_pull(HIGGS_FILE_NAME_W_PULL)
+			not_higgs_data = read_data_without_pull(NOT_HIGGS_FILE_NAME_W_PULL)
+	else:
+		if fine is True:
+			higgs_data = read_pull(FINE_HIGGS_FILE_NAME_W_PULL)
+			not_higgs_data = read_pull(FINE_NOT_HIGGS_FILE_NAME_W_PULL)
+		else:
+			higgs_data = read_pull(HIGGS_FILE_NAME_W_PULL)
+			not_higgs_data = read_pull(NOT_HIGGS_FILE_NAME_W_PULL)
+	return higgs_data, not_higgs_data
+
 def read_data(filename):
 	return np.asarray([np.asarray(x.split()).astype(float) for x in open(filename)])
 
@@ -42,13 +59,17 @@ def read_data_without_pull(filename):
 			for x in f:
 				i+= 1
 				l.append(np.asarray(x.split()).astype(float)[5:])
-				sys.stdout.write("Progress: %d   \r" % (i) )
+				sys.stdout.write("Progress from {0}: {1} \r".format(filename, i))
 				sys.stdout.flush()
+<<<<<<< HEAD
 				# if i > 30000:
 				# 	break
+=======
+				if i > M:
+					break
+>>>>>>> f30f71b4cfa759c157535198e41e0af5f55e80d0
 		return np.asarray(l)
 
-		# return np.asarray([np.asarray(x.split()).astype(float)[6:] for x in open(filename)])
 	elif 'withpull' in filename:
  		return np.asarray([np.asarray(x.split()).astype(float)[2:] for x in open(filename)])
  	else:
@@ -56,7 +77,18 @@ def read_data_without_pull(filename):
 	
 def read_pull(filename):
 	if 'fine' in filename:
-		return np.asarray([np.asarray(x.split()).astype(float)[:6] for x in open(filename)])
+		l = []
+		i = 0
+		with open(filename) as f:
+			for x in f:
+				i+= 1
+				l.append(np.asarray(x.split()).astype(float)[:5])
+				sys.stdout.write("Progress from {0}: {1} \r".format(filename, i))
+				sys.stdout.flush()
+				if i > M:
+					break
+		return np.asarray(l)
+
 	if 'withpull' in filename:
 		return np.asarray([np.asarray(x.split()).astype(float)[:2] for x in open(filename)])
 	else:
