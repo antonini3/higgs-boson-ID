@@ -8,6 +8,7 @@ from sklearn.metrics import roc_curve, auc
 
 import scipy
 
+import sys
 
 
 
@@ -18,6 +19,7 @@ def visualize_plot(arr):
 	plt.show()
 
 def array_to_matrix(arr):
+	print len(arr)
 	return [[arr[i * NUM_PIXELS + j] for j in range(NUM_PIXELS)] for i in range(NUM_PIXELS)]
 
 def array_to_numpy_matrix(arr):
@@ -27,12 +29,28 @@ def read_data(filename):
 	return np.asarray([np.asarray(x.split()).astype(float) for x in open(filename)])
 
 def read_data_without_pull(filename):
-	if 'withpull' in filename:
+	if 'fine' in filename:
+		l = []
+		i = 0
+		with open(filename) as f:
+			for x in f:
+				i+= 1
+				l.append(np.asarray(x.split()).astype(float)[5:])
+				sys.stdout.write("Progress: %d   \r" % (i) )
+				sys.stdout.flush()
+				if i > 30000:
+					break
+		return np.asarray(l)
+
+		# return np.asarray([np.asarray(x.split()).astype(float)[6:] for x in open(filename)])
+	elif 'withpull' in filename:
  		return np.asarray([np.asarray(x.split()).astype(float)[2:] for x in open(filename)])
  	else:
  		print "No pull in this file"
-
+	
 def read_pull(filename):
+	if 'fine' in filename:
+		return np.asarray([np.asarray(x.split()).astype(float)[:6] for x in open(filename)])
 	if 'withpull' in filename:
 		return np.asarray([np.asarray(x.split()).astype(float)[:2] for x in open(filename)])
 	else:
@@ -80,7 +98,7 @@ def convert_all_to_jpg():
 		convert_matrix_to_jpg(higgs_matrix, 'not_higgs_{0}.jpg'.format(i))
 
 if __name__ == '__main__':
-	# higgs_file_data = read_data(NOT_HIGGS_FILE_NAME)
+	# higgs_file_data = read_data_without_pull(FINE_NOT_HIGGS_FILE_NAME_W_PULL)
 	# visualize_plot(higgs_file_data[0])
 	convert_all_to_jpg()
 

@@ -24,7 +24,7 @@ def classify(clf, pull, name, train_size=None):
 	print "Accuracy is: {0}".format(accuracy_test)
 	y_probs_test = clf.predict_proba(x_test)
 
-	y_probs_train = clf.predict_proba(x_train)
+	# y_probs_train = clf.predict_proba(x_train)
 	plot_roc(y_test, y_probs_test, name)
 
 	return accuracy_test, accuracy_train
@@ -33,8 +33,8 @@ def classify(clf, pull, name, train_size=None):
 
 def preprocessing(pull, train_size=None):
 	if pull is False:
-		higgs_data = read_data_without_pull(HIGGS_FILE_NAME_W_PULL)
-		not_higgs_data = read_data_without_pull(NOT_HIGGS_FILE_NAME_W_PULL)
+		higgs_data = read_data_without_pull(FINE_HIGGS_FILE_NAME_W_PULL)
+		not_higgs_data = read_data_without_pull(FINE_NOT_HIGGS_FILE_NAME_W_PULL)
 	else:
 		higgs_data = read_pull(HIGGS_FILE_NAME_W_PULL)
 		not_higgs_data = read_pull(NOT_HIGGS_FILE_NAME_W_PULL)
@@ -80,11 +80,11 @@ def error_plotting():
 
 if __name__ == '__main__':
 	# error_plotting()
-	# classify(LogisticRegression(verbose=1, max_iter=300), True)
 	# classify(svm.SVC(verbose=1, kernel='poly', max_iter=100000000))
 	setup_figure()
-	for pull, name in zip([True, False], ["Pull", "Our classifier"]):
-		classify(ExtraTreesClassifier(n_estimators=300, verbose=1), pull, name)
+	# for pull, name in zip([True, False], ["Pull", "Our classifier"]):
+		# classify(LogisticRegression(verbose=1, max_iter=300), pull, name)
+	classify(ExtraTreesClassifier(n_estimators=300, verbose=1), False, "Our classifier")
 	plot_show()
 	# opencv_preprocessing('../images/')
 
