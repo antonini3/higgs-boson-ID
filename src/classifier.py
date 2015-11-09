@@ -12,8 +12,8 @@ from os.path import isfile, join
 from sklearn.metrics import accuracy_score, roc_auc_score
 
 
-def classify(clf, pull, name, train_size=None):
-	x, y = preprocessing(pull)
+def classify(clf, pull=False, name=None, fine=False, train_size=None):
+	x, y = preprocessing(pull=pull, fine=fine)
 	x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=TEST_SET_RATIO, random_state=42)
 	clf.fit(x_train, y_train)
 	y_hat = clf.predict(x_test)
@@ -29,16 +29,8 @@ def classify(clf, pull, name, train_size=None):
 
 	return accuracy_test, accuracy_train
 
-
-
-def preprocessing(pull, train_size=None):
-	if pull is False:
-		higgs_data = read_data_without_pull(FINE_HIGGS_FILE_NAME_W_PULL)
-		not_higgs_data = read_data_without_pull(FINE_NOT_HIGGS_FILE_NAME_W_PULL)
-	else:
-		higgs_data = read_pull(HIGGS_FILE_NAME_W_PULL)
-		not_higgs_data = read_pull(NOT_HIGGS_FILE_NAME_W_PULL)
-
+def preprocessing(pull=False, fine=False, train_size=None):
+	higgs_data, not_higgs_data = get_data(pull, fine)
 
 	higgs_data = zip(higgs_data, [1] * len(higgs_data))
 	not_higgs_data = zip(not_higgs_data, [0] * len(not_higgs_data))
@@ -84,7 +76,7 @@ if __name__ == '__main__':
 	setup_figure()
 	# for pull, name in zip([True, False], ["Pull", "Our classifier"]):
 		# classify(LogisticRegression(verbose=1, max_iter=300), pull, name)
-	classify(ExtraTreesClassifier(n_estimators=300, verbose=1), False, "Our classifier")
+	classify(ExtraTreesClassifier(n_estimators=300, verbose=1), pull=False, name="Our classifier", fine=True)
 	plot_show()
 	# opencv_preprocessing('../images/')
 
