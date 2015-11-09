@@ -1,5 +1,5 @@
 
-NUM_PIXELS = 100 # 25 
+NUM_PIXELS =  25 
 
 TEST_SET_RATIO = 0.25
 

@@ -12,10 +12,16 @@ import sys
 
 
 
-def visualize_plot(arr):
+def visualize_plot(arr, title=None, x_axis=None, y_axis=None):
 	matrix = array_to_numpy_matrix(arr)
 	fig = plt.figure()
-	plt.imshow(matrix)
+	if title is not None:
+		plt.title(title)
+	if x_axis is not None:
+		plt.xlabel(x_axis)
+	if y_axis is not None:
+		plt.ylabel(y_axis)
+	plt.imshow(matrix, cmap=plt.get_cmap('Paired'))
 	plt.show()
 
 def array_to_matrix(arr):
@@ -38,8 +44,8 @@ def read_data_without_pull(filename):
 				l.append(np.asarray(x.split()).astype(float)[5:])
 				sys.stdout.write("Progress: %d   \r" % (i) )
 				sys.stdout.flush()
-				if i > 30000:
-					break
+				# if i > 30000:
+				# 	break
 		return np.asarray(l)
 
 		# return np.asarray([np.asarray(x.split()).astype(float)[6:] for x in open(filename)])
@@ -65,7 +71,7 @@ def setup_figure():
 def plot_roc(y_test, y_probs, name):
 	fpr, tpr, threshold = roc_curve(y_test, y_probs[:,1])
 	roc_auc = auc(fpr, tpr)
-	plt.plot(tpr, 1/fpr, label=name + ' (area = %0.2f)' % roc_auc)
+	fig, axes = plt.plot(tpr, 1/fpr, label=name + ' (area = %0.2f)' % roc_auc)
 	x = np.arange(0, 1, 0.001)
 	y = 1/x
 	plt.plot(x, y, 'k--')
@@ -98,7 +104,9 @@ def convert_all_to_jpg():
 		convert_matrix_to_jpg(higgs_matrix, 'not_higgs_{0}.jpg'.format(i))
 
 if __name__ == '__main__':
-	# higgs_file_data = read_data_without_pull(FINE_NOT_HIGGS_FILE_NAME_W_PULL)
-	# visualize_plot(higgs_file_data[0])
-	convert_all_to_jpg()
+	higgs_file_data = read_data(HIGGS_FILE_NAME)
+	visualize_plot(higgs_file_data[224], title="Signal colorflow energy image", x_axis="eta", y_axis="phi")
+	not_higgs_file_data = read_data(NOT_HIGGS_FILE_NAME)
+	visualize_plot(not_higgs_file_data[198], title="Background colorflow energy image", x_axis="eta", y_axis="phi")
+	# convert_all_to_jpg()
 

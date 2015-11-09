@@ -33,8 +33,8 @@ def classify(clf, pull, name, train_size=None):
 
 def preprocessing(pull, train_size=None):
 	if pull is False:
-		higgs_data = read_data_without_pull(FINE_HIGGS_FILE_NAME_W_PULL)
-		not_higgs_data = read_data_without_pull(FINE_NOT_HIGGS_FILE_NAME_W_PULL)
+		higgs_data = read_data_without_pull(HIGGS_FILE_NAME_W_PULL)
+		not_higgs_data = read_data_without_pull(NOT_HIGGS_FILE_NAME_W_PULL)
 	else:
 		higgs_data = read_pull(HIGGS_FILE_NAME_W_PULL)
 		not_higgs_data = read_pull(NOT_HIGGS_FILE_NAME_W_PULL)
@@ -82,9 +82,9 @@ if __name__ == '__main__':
 	# error_plotting()
 	# classify(svm.SVC(verbose=1, kernel='poly', max_iter=100000000))
 	setup_figure()
-	# for pull, name in zip([True, False], ["Pull", "Our classifier"]):
-		# classify(LogisticRegression(verbose=1, max_iter=300), pull, name)
-	classify(ExtraTreesClassifier(n_estimators=300, verbose=1), False, "Our classifier")
+	for pull, name in zip([True, False], ["Pull", "Our classifier"]):
+		classify(ExtraTreesClassifier(n_estimators=300, verbose=1), pull, name)
+	# classify(ExtraTreesClassifier(n_estimators=300, verbose=1), False, "Our classifier")
 	plot_show()
 	# opencv_preprocessing('../images/')
 
