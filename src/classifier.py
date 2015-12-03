@@ -52,8 +52,8 @@ def classify(clf, pull=False, name=None, fine=False, train_size=None, subset_siz
 	print "Accuracy is: {0}".format(accuracy_test)
 	y_probs_test = clf.predict_proba(x_test)
 
-	# y_probs_train = clf.predict_proba(x_train)
-	plot_roc(y_test, y_probs_test, name)
+	y_probs_train = clf.predict_proba(x_train)
+	plot_roc(y_train, y_probs_train, name)
 
 	return accuracy_test, accuracy_train
 
@@ -134,13 +134,15 @@ def error_plotting():
 	all_size = [100, 500, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000]
 	# all_size = [50,100]
 	train_size = [elem * (1 - TEST_SET_RATIO) for elem in all_size]
-	errors = [classify(ExtraTreesClassifier(n_estimators=500, verbose=1), False, size) for size in all_size]
+	classifier = AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50))
+	subset_features = 40
+	errors = [classify(classifier, pull=False, name="{0} features and {1} training set size".format(subset_features, size),fine=False, train_size=size, subset_size=subset_features) for size in all_size]
 	test_error, train_error = zip(*errors)
 	plot_error(train_size, test_error, train_error)
 
 
 if __name__ == '__main__':
-	# error_plotting()
+	error_plotting()
 	# classify(svm.SVC(verbose=1, kernel='poly', max_iter=100000000))
 	
 	#setup_figure()
@@ -167,10 +169,11 @@ if __name__ == '__main__':
 	# for classifier, name in zip(classifiers, names):
 	# 	print name
 	# 	classify(classifier, pull=False, name=name, fine=False)
-	classifier = AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50))
+	#classifier = AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50))
 	#classifier = ExtraTreesClassifier(random_state=42, criterion='entropy', n_estimators=200, verbose=1)
-	#classify(classifier, pull=False, name="AdaBoost", fine=False)
-	show_features(classifier, pull=False, fine=False)
+	#for i in [1, 5, 10, 15, 20, 25, 30]:
+		#classify(classifier, pull=False, name="{0} features".format(i), fine=False, subset_size=i)
+	#show_features(classifier, pull=False, fine=False)
 	#plot_show()
 	
 	
