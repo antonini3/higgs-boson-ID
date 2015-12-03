@@ -10,7 +10,13 @@ import scipy
 
 import sys
 
-
+def plot_accuracy(accuracies):
+	fig = plt.figure()
+	plt.plot([1 + i for i in range(len(accuracies))], accuracies)
+	plt.xlabel('Number of Features')
+	plt.ylabel('Accuracy')
+	plt.title('Features by importance and accuracy they add')
+	plt.show()
 
 def visualize_plot(arr, title=None, x_axis=None, y_axis=None):
 	matrix = array_to_numpy_matrix(arr)
@@ -150,6 +156,13 @@ def convert_all_to_jpg():
 	not_higgs_data = read_data(NOT_HIGGS_FILE_NAME)
 	for i, not_higgs_matrix in enumerate(not_higgs_data):
 		convert_matrix_to_jpg(higgs_matrix, 'not_higgs_{0}.jpg'.format(i))
+
+
+def array_index_to_matrix_index(index):
+	for row in range(NUM_PIXELS):
+		if index < (NUM_PIXELS * row) + NUM_PIXELS and index >= NUM_PIXELS * row:
+			return index - NUM_PIXELS * row, row
+	return -1, -1
 
 if __name__ == '__main__':
 	higgs_file_data = read_data(HIGGS_FILE_NAME)
