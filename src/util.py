@@ -24,8 +24,26 @@ def visualize_plot(arr, title=None, x_axis=None, y_axis=None):
 	plt.imshow(matrix, cmap=plt.get_cmap('Paired'))
 	plt.show()
 
+def global_maximas(arr, THRESHOLD=0.0, NUM_AROUND=1):
+	matrix = array_to_matrix(arr)
+
+	total = 0
+	for row in range(NUM_AROUND, NUM_PIXELS - NUM_AROUND):
+		for col in range(NUM_AROUND, NUM_PIXELS - NUM_AROUND):
+			elem = matrix[row][col]
+			is_max = True
+			for row_n in range(row - NUM_AROUND, row + NUM_AROUND + 1):
+				for col_n in range(row - NUM_AROUND, row + NUM_AROUND + 1):
+					if matrix[row_n][col_n] > elem - THRESHOLD:
+						is_max = False
+						break
+				if not is_max:
+					break
+			total += int(is_max)
+
+	return total
+
 def array_to_matrix(arr):
-	print len(arr)
 	return [[arr[i * NUM_PIXELS + j] for j in range(NUM_PIXELS)] for i in range(NUM_PIXELS)]
 
 def array_to_numpy_matrix(arr):
@@ -58,15 +76,18 @@ def read_data_without_pull(filename):
 		with open(filename) as f:
 			for x in f:
 				i+= 1
-				l.append(np.asarray(x.split()).astype(float)[5:])
+				a = x.split()
+				l.append(np.asarray(a).astype(float)[5:])
 				sys.stdout.write("Progress from {0}: {1} \r".format(filename, i))
 				sys.stdout.flush()
 				if i > M:
+					print i
 					break
 		return np.asarray(l)
 
 	elif 'withpull' in filename:
- 		return np.asarray([np.asarray(x.split()).astype(float)[2:] for x in open(filename)])
+		num_skipped = 2
+ 		return np.asarray([np.asarray(x.split()).astype(float)[num_skipped:] for x in open(filename)])
  	else:
  		print "No pull in this file"
 	
@@ -98,16 +119,16 @@ def setup_figure():
 def plot_roc(y_test, y_probs, name):
 	fpr, tpr, threshold = roc_curve(y_test, y_probs[:,1])
 	roc_auc = auc(fpr, tpr)
-	fig, axes = plt.plot(tpr, 1/fpr, label=name + ' (area = %0.2f)' % roc_auc)
-	x = np.arange(0, 1, 0.001)
-	y = 1/x
-	plt.plot(x, y, 'k--')
-	plt.xlim([0.2, 0.8])
-	plt.ylim([0.0, 100])
-	plt.xlabel('Signal Efficiency')
-	plt.ylabel('1/(Background Efficiency)')
+	fig = plt.plot(fpr, tpr, label=name + ' (area = %0.3f)' % roc_auc)
+	# x = np.arange(0.00001, 1, 0.001)
+	# y = 1/x
+	# plt.plot(x, y, 'k--')
+	plt.xlim([0.0, 1.0])
+	plt.ylim([0.0, 1.0])
+	plt.xlabel('False positive rate')
+	plt.ylabel('True positive rate')
 	plt.title('Higgs Boson Receiver Operating Characteristics')
-	plt.legend(loc="upper right")
+	plt.legend(loc="lower right")
 
 def plot_show():
 	plt.show()
@@ -133,7 +154,7 @@ def convert_all_to_jpg():
 if __name__ == '__main__':
 	higgs_file_data = read_data(HIGGS_FILE_NAME)
 	visualize_plot(higgs_file_data[224], title="Signal colorflow energy image", x_axis="eta", y_axis="phi")
-	not_higgs_file_data = read_data(NOT_HIGGS_FILE_NAME)
-	visualize_plot(not_higgs_file_data[198], title="Background colorflow energy image", x_axis="eta", y_axis="phi")
+	# not_higgs_file_data = read_data(NOT_HIGGS_FILE_NAME)
+	# visualize_plot(not_higgs_file_data[198], title="Background colorflow energy image", x_axis="eta", y_axis="phi")
 	# convert_all_to_jpg()
 

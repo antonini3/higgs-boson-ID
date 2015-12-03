@@ -3,7 +3,7 @@ NUM_PIXELS =  25
 
 TEST_SET_RATIO = 0.25
 
-M = 1000
+M = 10000
 
 HIGGS_FILE_NAME = "../data/ColorflowData_Higgs_10k.txt"
 
