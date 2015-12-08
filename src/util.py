@@ -75,6 +75,14 @@ def get_data(pull=False, fine=False):
 def read_data(filename):
 	return np.asarray([np.asarray(x.split()).astype(float) for x in open(filename)])
 
+def scatter_plot(x, y, dec_boundry=None):
+	higgs = [x[i] for i in xrange(len(x)) if y[i] == 1]
+	non_higgs = [x[i] for i in xrange(len(x)) if y[i] == 0]
+	x_1_higgs, x_2_higgs = zip(*higgs)
+	x_1_non_higgs, x_2_non_higgs = zip(*non_higgs)
+	plt.scatter(x_1_higgs, x_2_higgs, color='green')
+	plt.scatter(x_1_non_higgs, x_2_non_higgs, color='blue')
+
 def read_data_without_pull(filename):
 	if 'fine' in filename:
 		l = []

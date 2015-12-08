@@ -23,6 +23,7 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, AdaBoos
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from sklearn.decomposition import PCA, FastICA
 
 
 def classify(clf, pull=False, name=None, fine=False, train_size=None, subset_size=None):
@@ -44,6 +45,7 @@ def classify(clf, pull=False, name=None, fine=False, train_size=None, subset_siz
 
 	x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=TEST_SET_RATIO, random_state=42)
 	clf.fit(x_train, y_train)
+
 	y_hat = clf.predict(x_test)
 	accuracy_test = accuracy_score(y_test, y_hat)
 
@@ -56,6 +58,22 @@ def classify(clf, pull=False, name=None, fine=False, train_size=None, subset_siz
 	plot_roc(y_train, y_probs_train, name)
 
 	return accuracy_test, accuracy_train
+
+def get_parameters(clf, pull=False, fine=False):
+	x, y = preprocessing(pull=pull, fine=fine)
+	clf.fit(x, y)
+	decision_function = clf.decision_function(x)
+	return decision_function
+
+def component_analysis(ca_type='pca', pull=False, fine=False):
+	x, y = preprocessing(pull=pull, fine=fine)
+	if ca_type == 'pca':
+		ca = PCA(n_components=2)
+	elif ca_type == 'ica':
+		ca = FastICA(n_components=2)
+	x_red= ca.fit_transform(x)
+	scatter_plot(x_red, y)
+
 
 def show_features(clf, pull=False, fine=False):
 	x, y = preprocessing(pull=pull, fine=fine)
@@ -142,39 +160,15 @@ def error_plotting():
 
 
 if __name__ == '__main__':
-	error_plotting()
-	# classify(svm.SVC(verbose=1, kernel='poly', max_iter=100000000))
+	# error_plotting()
 	
-	#setup_figure()
-	# # for pull, fine, name, classifier in zip([True, False, False], [False, False, True], ["Pull classifier", "Our classifier on coarse data", "Our classifier on fine data"], \
-	# # 	[QuadraticDiscriminantAnalysis(), AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50)), \
-	# # 	AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50))]):
-	# # 	classify(classifier, pull=pull, name=name, fine=fine)
-	# for train_size in [10, 30, 50, 100, 200, 300, 500, 1000, 1500, 3000, 5000, 10000] :
-	#  	classify(AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50)), pull=False, name=str(train_size) + " training size", fine=False, train_size=train_size)
-	# plot_show()
-
-	# classifiers = [ LinearDiscriminantAnalysis(), QuadraticDiscriminantAnalysis(), KNeighborsClassifier(), GaussianNB(), RandomForestClassifier(), 
-	#     ExtraTreesClassifier(random_state=42, criterion='entropy', n_estimators=400, verbose=1), LogisticRegression(),
-	#     AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50))]
-	# names = [ "LDA", "QDA", "K-Neighbors", "Gaussian Naive Bayes", "Random Forest", "Extra Trees", "Logistic Regression", "AdaBoost"]
-	# # classifiers = [AdaBoostClassifier(n_estimators=350, random_state=42, base_estimator=RandomForestClassifier(random_state=600, n_estimators=350))] # A = 0.800, AUC = 0.87
-	# # classifiers = [ExtraTreesClassifier(random_state=42, criterion='entropy', n_estimators=400, verbose=1)] 
-	# # classifiers = [AdaBoostRegressor(random_state=42, loss='square', n_estimators=200, base_estimator=RandomForestClassifier(random_state=600, verbose=1, n_estimators=200))] 
-
-	# # classifiers = [LinearDiscriminantAnalysis()]
-
-	# # names = ["AdaBoost (Random)"]
-	# setup_figure()
-	# for classifier, name in zip(classifiers, names):
-	# 	print name
-	# 	classify(classifier, pull=False, name=name, fine=False)
-	#classifier = AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50))
-	#classifier = ExtraTreesClassifier(random_state=42, criterion='entropy', n_estimators=200, verbose=1)
-	#for i in [1, 5, 10, 15, 20, 25, 30]:
-		#classify(classifier, pull=False, name="{0} features".format(i), fine=False, subset_size=i)
+	setup_figure()
+	classifier = AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50))
 	#show_features(classifier, pull=False, fine=False)
-	#plot_show()
+	#visualize_plot(get_parameters(classifier, pull=False, fine=False))
+	component_analysis(ca_type='ica', pull=False, fine=False)
+	#classify(classifier, pull=False, fine=False, name="Adaboost")
+	plot_show()
 	
 	
 	
