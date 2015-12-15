@@ -23,12 +23,29 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, AdaBoos
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from sklearn.decomposition import PCA, FastICA
 
 
-def classify(clf, pull=False, name=None, fine=False, train_size=None):
+def classify(clf, pull=False, name=None, fine=False, train_size=None, subset_size=None):
 	x, y = preprocessing(pull=pull, fine=fine)
+
+	if subset_size != None:
+		clf.fit(x, y)
+		important_features = clf.feature_importances_
+		indices = np.argsort(important_features)[::-1]
+		x_subset = []
+		for x_i in x:
+			x_i_subset = []
+			for j, idx in enumerate(indices):
+				x_i_subset.append(x_i[idx])
+				if j == subset_size:
+					break
+			x_subset.append(x_i_subset)
+		x = x_subset
+
 	x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=TEST_SET_RATIO, random_state=42)
 	clf.fit(x_train, y_train)
+
 	y_hat = clf.predict(x_test)
 	accuracy_test = accuracy_score(y_test, y_hat)
 
@@ -37,14 +54,66 @@ def classify(clf, pull=False, name=None, fine=False, train_size=None):
 	print "Accuracy is: {0}".format(accuracy_test)
 	y_probs_test = clf.predict_proba(x_test)
 
-	# y_probs_train = clf.predict_proba(x_train)
-	plot_roc(y_test, y_probs_test, name)
+	y_probs_train = clf.predict_proba(x_train)
+	plot_roc(y_train, y_probs_train, name)
 
 	return accuracy_test, accuracy_train
 
+def get_parameters(clf, pull=False, fine=False):
+	x, y = preprocessing(pull=pull, fine=fine)
+	clf.fit(x, y)
+	decision_function = clf.decision_function(x)
+	return decision_function
+
+def component_analysis(ca_type='pca', pull=False, fine=False):
+	x, y = preprocessing(pull=pull, fine=fine)
+	if ca_type == 'pca':
+		ca = PCA(n_components=2)
+	elif ca_type == 'ica':
+		ca = FastICA(n_components=2)
+	x_red= ca.fit_transform(x)
+	scatter_plot(x_red, y)
 
 
+def show_features(clf, pull=False, fine=False):
+	x, y = preprocessing(pull=pull, fine=fine)
+	clf.fit(x, y)
+	important_features = clf.feature_importances_
+	indices = np.argsort(important_features)[::-1][:1]
+	arr = numpy.zeros(shape=(NUM_PIXELS*NUM_PIXELS,))
+	for idx in indices:
+		arr[idx] = 1
+	#convert_matrix_to_jpg(arr, 'ten_imp_features.jpg')
+	visualize_plot(arr)
 
+	# matrix_indices = [array_index_to_matrix_index(array_index) for array_index in indices]
+	# mat = numpy.zeros(shape=(NUM_PIXELS,NUM_PIXELS))
+	# for matrix_idx in matrix_indices:
+	# 	mat[matrix_idx[0]:matrix_idx[1]] = 1
+	# print mat
+
+def plot_best_features(clf, x, y):
+	clf.fit(x, y)
+	important_features = clf.feature_importances_
+	indices = np.argsort(important_features)[::-1]
+	all_accuracy = []
+	for i in xrange(len(indices)):
+		x_subset = []
+		for x_i in x:
+			x_i_subset = []
+			for j, idx in enumerate(indices):
+				x_i_subset.append(x_i[idx])
+				if j==i:
+					break
+			x_subset.append(x_i_subset)
+		x_train, x_test, y_train, y_test = train_test_split(x_subset, y, test_size=TEST_SET_RATIO, random_state=42)
+		clf.fit(x_train, y_train)
+		y_hat = clf.predict(x_test)
+		accuracy_test = accuracy_score(y_test, y_hat)
+		all_accuracy.append(accuracy_test)
+		if i == 40:
+			break
+	plot_accuracy(all_accuracy)
 
 
 def preprocessing(pull=False, fine=False, train_size=None):
@@ -84,15 +153,20 @@ def error_plotting():
 	# all_size = [50,100]
 	train_size = [elem * (1 - TEST_SET_RATIO) for elem in all_size]
 	errors = [classify(AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50, max_features=100)), pull=False, fine=False, train_size=size) for size in all_size]
+
+	# classifier = AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50))
+	# subset_features = 40
+	# errors = [classify(classifier, pull=False, name="{0} features and {1} training set size".format(subset_features, size),fine=False, train_size=size, subset_size=subset_features) for size in all_size]
+
 	test_error, train_error = zip(*errors)
 	plot_error(train_size, test_error, train_error)
 
 
 if __name__ == '__main__':
 	# error_plotting()
-	# classify(svm.SVC(verbose=1, kernel='poly', max_iter=100000000))
 	
 	setup_figure()
+
 	# # for pull, fine, name, classifier in zip([True, False, False], [False, False, True], ["Pull classifier", "Our classifier on coarse data", "Our classifier on fine data"], \
 	# # 	[QuadraticDiscriminantAnalysis(), AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50)), \
 	# # 	AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50))]):
@@ -124,7 +198,13 @@ if __name__ == '__main__':
 	# 	print name
 	# 	classify(classifier, pull=True, name=name, fine=False)
 	# plot_show()
-	
+	classifier = AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50))
+	#show_features(classifier, pull=False, fine=False)
+	#visualize_plot(get_parameters(classifier, pull=False, fine=False))
+	component_analysis(ca_type='ica', pull=False, fine=False)
+	#classify(classifier, pull=False, fine=False, name="Adaboost")
+	plot_show()
+
 	
 	
 	# opencv_preprocessing('../images/')
