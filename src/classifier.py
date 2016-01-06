@@ -1,4 +1,5 @@
 
+
 from constants import *
 from util import *
 
@@ -25,6 +26,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.decomposition import PCA, FastICA
 
+''' Our final 229 classifier: AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50)) '''
 
 def classify(clf, pull=False, name=None, fine=False, train_size=None, subset_size=None):
 	x, y = preprocessing(pull=pull, fine=fine)
@@ -163,46 +165,12 @@ def error_plotting():
 
 
 if __name__ == '__main__':
-	# error_plotting()
-	
+
 	setup_figure()
 
-	# # for pull, fine, name, classifier in zip([True, False, False], [False, False, True], ["Pull classifier", "Our classifier on coarse data", "Our classifier on fine data"], \
-	# # 	[QuadraticDiscriminantAnalysis(), AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50)), \
-	# # 	AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50))]):
-	# # 	classify(classifier, pull=pull, name=name, fine=fine)
-	# for depth in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, None]:
-	# 	print "depth", depth
-	#  	classify(AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=depth, n_estimators=50, max_features=100)), pull=False, name=str(depth) + " maximum depth", fine=False)
-	# plot_show()
-
-	for train_size in [1000]:
-		print "train_size", train_size
-	 	classify(AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50, max_features=100)), pull=False, name=str(train_size) + " training size", fine=False, train_size=train_size)
-	plot_show()
-
-
-	# classifiers = [ LinearDiscriminantAnalysis(), QuadraticDiscriminantAnalysis(), KNeighborsClassifier(), GaussianNB(), RandomForestClassifier(), 
-	#     ExtraTreesClassifier(random_state=42, criterion='entropy', n_estimators=400, verbose=1), LogisticRegression(),
-	#     AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50))]
-	# names = [ "LDA", "QDA", "K-Neighbors", "Gaussian Naive Bayes", "Random Forest", "Extra Trees", "Logistic Regression", "AdaBoost"]
-	# classifiers = [AdaBoostClassifier(n_estimators=350, random_state=42, base_estimator=RandomForestClassifier(random_state=600, n_estimators=350))] # A = 0.800, AUC = 0.87
-	# classifiers = [ExtraTreesClassifier(random_state=42, criterion='entropy', n_estimators=400, verbose=1)] 
-	# classifiers = [AdaBoostRegressor(random_state=42, loss='square', n_estimators=200, base_estimator=RandomForestClassifier(random_state=600, verbose=1, n_estimators=200))] 
-
-	# classifiers = [QuadraticDiscriminantAnalysis()]
-
-	# names = ["Fisher Discriminant Analysis with Pull Data"]
-	# setup_figure()
-	# for classifier, name in zip(classifiers, names):
-	# 	print name
-	# 	classify(classifier, pull=True, name=name, fine=False)
-	# plot_show()
 	classifier = AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=5, n_estimators=50))
-	#show_features(classifier, pull=False, fine=False)
-	#visualize_plot(get_parameters(classifier, pull=False, fine=False))
-	component_analysis(ca_type='ica', pull=False, fine=False)
-	#classify(classifier, pull=False, fine=False, name="Adaboost")
+	classify(classifier, pull=False, fine=False, name="Adaboost")
+
 	plot_show()
 
 	
