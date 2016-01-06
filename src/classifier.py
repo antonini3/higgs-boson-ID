@@ -163,6 +163,42 @@ def error_plotting():
 	test_error, train_error = zip(*errors)
 	plot_error(train_size, test_error, train_error)
 
+def plot_trees(clf, pull=False, fine=False):
+	x, y = preprocessing(pull=pull, fine=fine)
+	clf.fit(x, y)
+
+	def rules(clf, features, labels, node_index=0):
+	    """Structure of rules in a fit decision tree classifier
+
+	    Parameters
+	    ----------
+	    clf : DecisionTreeClassifier
+	        A tree that has already been fit.
+
+	    features, labels : lists of str
+	        The names of the features and labels, respectively.
+
+	    from http://planspace.org/20151129-see_sklearn_trees_with_d3/
+	    """
+	    node = {}
+	    if clf.tree_.children_left[node_index] == -1:  # indicates leaf
+	        count_labels = zip(clf.tree_.value[node_index, 0], labels)
+	        node['name'] = ', '.join(('{} of {}'.format(int(count), label)
+	                                  for count, label in count_labels))
+	    else:
+	        feature = features[clf.tree_.feature[node_index]]
+	        threshold = clf.tree_.threshold[node_index]
+	        node['name'] = '{} > {}'.format(feature, threshold)
+	        left_index = clf.tree_.children_left[node_index]
+	        right_index = clf.tree_.children_right[node_index]
+	        node['children'] = [rules(clf, features, labels, right_index),
+	                            rules(clf, features, labels, left_index)]
+	   	return node
+	print NUM_PIXELS*NUM_PIXELS
+	print []
+	clf_rules = rules(clf, ["Pixel ({0}, {1})".format(str(array_index_to_matrix_index(i))) for i in range(NUM_PIXELS*NUM_PIXELS)], ["Higgs", "Non-Higgs"])
+	print clf_rules
+
 
 if __name__ == '__main__':
 
