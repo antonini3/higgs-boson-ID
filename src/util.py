@@ -78,6 +78,19 @@ def get_data(pull=False, fine=False):
 def read_data(filename):
 	return np.asarray([np.asarray(x.split()).astype(float) for x in open(filename)])
 
+def boolean_y(y):
+	length = y.shape[0]
+	ret_y = np.zeros((length, NUM_CLASSES))
+	ret_y[range(length),y] = 1
+	return ret_y
+
+def get_batch(x_train, y_train, batch_size=50):
+	perm = np.arange(len(x_train))
+	np.random.shuffle(perm)
+	perm = perm[:batch_size]
+	return x_train[perm], y_train[perm]
+
+
 def scatter_plot(x, y, dec_boundry=None):
 	higgs = [x[i] for i in xrange(len(x)) if y[i] == 1]
 	non_higgs = [x[i] for i in xrange(len(x)) if y[i] == 0]
