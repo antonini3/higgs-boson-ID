@@ -133,6 +133,7 @@ def permute_arrays(arr1, arr2):
 def setup_figure():
 	plt.figure()
 
+
 def plot_roc(y_test, y_probs, name):
 	fpr, tpr, threshold = roc_curve(y_test, y_probs[:,1])
 	roc_auc = auc(fpr, tpr)
@@ -147,6 +148,10 @@ def plot_roc(y_test, y_probs, name):
 	plt.ylabel('True positive rate')
 	plt.title('Higgs Boson Receiver Operating Characteristics')
 	plt.legend(loc="lower right")
+
+def get_auc(y_test, y_probs):
+	fpr, tpr, threshold = roc_curve(y_test, y_probs[:,1])
+	return auc(fpr, tpr)
 
 def plot_show():
 	plt.show()
