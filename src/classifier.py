@@ -17,7 +17,6 @@ import numpy
 
 import itertools
 
-
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
@@ -66,16 +65,20 @@ def cross_validate(clf, pull=False, name=None, fine=False, k=2):
 	x, y = preprocessing(pull=pull, fine=fine)
 	kf = KFold(len(x), n_folds=k)
 	auc_sum = 0.0
+	acc_sum = 0.0
 	for i, (train_indices, test_indices) in enumerate(kf):
 		x_train, x_test = x[train_indices], x[test_indices]
 		y_train, y_test = y[train_indices], y[test_indices]
 		clf.fit(x_train, y_train)
 		y_probs = clf.predict_proba(x_test)
 		auc = get_auc(y_test, y_probs)
+		accuracy_test = accuracy_score(y_test, clf.predict(x_test))
 		auc_sum += auc
-		print "Iteration number {0} has auc of {1}".format(i, auc)
+		acc_sum += accuracy_test
+		print "Iteration number {0} has auc of {1} and accuracy of {2}".format(i, auc, accuracy_test)
 
 	print "Average AUC is: {0}".format(auc_sum/k)
+	print 'Average accuracy is: {0}'.format(acc_sum/k)
 
 def correlation_image(clf, pull=False, name=None, fine=False):
 	x, y = preprocessing(pull=pull, fine=fine)

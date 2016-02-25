@@ -84,11 +84,11 @@ def boolean_y(y):
 	ret_y[range(length),y] = 1
 	return ret_y
 
-def get_batch(x_train, y_train, batch_size=50):
-	perm = np.arange(len(x_train))
+def permute(x, y):
+	# np.random.seed(42)
+	perm = range(len(x))
 	np.random.shuffle(perm)
-	perm = perm[:batch_size]
-	return x_train[perm], y_train[perm]
+	return x[perm], y[perm]
 
 
 def scatter_plot(x, y, dec_boundry=None):
