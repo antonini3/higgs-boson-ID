@@ -76,10 +76,10 @@ h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 W_fc2 = weight_variable([1024, NUM_CLASSES])
 b_fc2 = bias_variable([NUM_CLASSES])
 
-y_conv=tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
+y_conv = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
 NUM_EPOCHS = 20
-batch_size = 30
+batch_size = 32
 
 ## train and evaluate the model
 cross_entropy = -tf.reduce_sum(y_*tf.log(y_conv + 1e-7))

@@ -169,17 +169,16 @@ def get_auc(y_test, y_probs):
 def plot_show():
 	plt.show()
 
-def plot_error(x, first_error, second_error=None):
+def our_plot(x, ys, y_labels=None, y_label='Accuracy', x_label='Epochs', title=''):
 	plt.figure()
-	plt.plot(x, first_error, label="Test set")
-	if second_error is not None:
-		plt.plot(x, second_error, label="Train set")
-	plt.xlabel('Training size')
-	plt.ylabel('Error')
+	for i, y in enumerate(ys):
+		plt.plot(x, y, label=y_labels[i] if y_labels is not None else '')
+
+	plt.xlabel(x_label)
+	plt.ylabel(y_label)
 	plt.ylim([0.0, 1.0])
-	# plt.xlim([0.0, 1.0])
 	plt.legend(loc="lower right")
-	# plt.title('Higgs Boson Receiver Operating Characteristics')
+	plt.title(title)
 	plt.show()
 
 def convert_matrix_to_jpg(array, jpg_file_name):
