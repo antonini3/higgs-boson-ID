@@ -99,6 +99,23 @@ def scatter_plot(x, y, dec_boundry=None):
 	plt.scatter(x_1_higgs, x_2_higgs, color='green')
 	plt.scatter(x_1_non_higgs, x_2_non_higgs, color='blue')
 
+def read_higgs_data(filename, max_size=None, skip=0):
+	l = []
+	with open(filename) as f:
+		for i, x in enumerate(f):
+			x_array = x.split()[skip:]
+			if len(x_array) < IMG_DIMENSION:
+				x_array.insert(0, 0.)
+			
+			l.append(np.asarray(x_array, dtype=float))
+			
+			sys.stdout.write("Progress from {0}: {1} \r".format(filename, i))
+			sys.stdout.flush()
+			if max_size is not None and i > max_size:
+				break
+	return np.asarray(l)
+
+
 def read_data_without_pull(filename):
 	if 'fine' in filename:
 		l = []

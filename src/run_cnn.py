@@ -13,7 +13,16 @@ import numpy as np
 np.set_printoptions(threshold='nan')
 
 def cnn_preprocessing(train_size=None):
-    x_total, y_total = preprocessing(pull=False, fine=False)
+    half_train = train_size / 2 if train_size is not None else None
+    higgs_data, not_higgs_data = read_higgs_data(HIGGS_FILE_NAME, max_size=half_train, skip=6), read_higgs_data(NOT_HIGGS_FILE_NAME, max_size=half_train, skip=6)
+
+    all_data = permute_arrays(zip(higgs_data, [1] * len(higgs_data)), zip(not_higgs_data, [0] * len(not_higgs_data)))
+
+    x, y = zip(*all_data)
+
+    x_total, y_total = np.asarray(x), np.asarray(y)
+
+    print x_total.shape
 
     # Padding
     x_temp = x_total.reshape((x_total.shape[0], NUM_PIXELS, NUM_PIXELS))
@@ -78,10 +87,8 @@ def run_cnn(model, learning_rate=1e-4, batch_size=32, epochs=20, dropout=1.0, pr
 
 
 
-cnn_preprocessing()
-
 if __name__ == '__main__':
     simple_model = SimpleModel()
     model = LaNet()
-    run_cnn(model, epochs=2, plot=True, print_every=20, dropout=0.8)
+    run_cnn(model, epochs=2, plot=True, print_every=20, dropout=0.8, train_size=20000)
 

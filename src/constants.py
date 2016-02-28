@@ -15,11 +15,10 @@ PADDED_NUM_PIXELS = 32
 
 PADDED_IMAGE_DIMENSION = PADDED_NUM_PIXELS ** 2
 
-M = 10000
 
-HIGGS_FILE_NAME = "../data/ColorflowData_Higgs_10k.txt"
+HIGGS_FILE_NAME = "../data/ColorflowData_Higgs_50k.txt"
 
-NOT_HIGGS_FILE_NAME = "../data/ColorflowData_notHiggs_10k.txt"
+NOT_HIGGS_FILE_NAME = "../data/ColorflowData_NotHiggs_50k.txt"
 
 HIGGS_FILE_NAME_W_PULL = "../data/ColorflowData_Higgs_25x25_withpull.txt"
 
