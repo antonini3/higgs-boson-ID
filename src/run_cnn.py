@@ -22,8 +22,6 @@ def cnn_preprocessing(train_size=None):
 
     x_total, y_total = np.asarray(x), np.asarray(y)
 
-    print x_total.shape
-
     # Padding
     x_temp = x_total.reshape((x_total.shape[0], NUM_PIXELS, NUM_PIXELS))
     x_temp = np.pad(x_temp, pad_width=[(0,0), (3,4), (3,4)], constant_values=0., mode='constant')
@@ -52,7 +50,7 @@ def cnn_preprocessing(train_size=None):
 
 
 
-def run_cnn(model, learning_rate=1e-4, batch_size=32, epochs=20, dropout=1.0, print_every=50, plot=False, train_size=None):
+def run_cnn(model, learning_rate=1e-4, decay=0.95, batch_size=32, epochs=20, dropout=1.0, print_every=50, plot=False, train_size=None):
     sess = tf.InteractiveSession()
     x_train, x_test, x_val, y_train, y_test, y_val = cnn_preprocessing(train_size=train_size)
 
@@ -89,6 +87,6 @@ def run_cnn(model, learning_rate=1e-4, batch_size=32, epochs=20, dropout=1.0, pr
 
 if __name__ == '__main__':
     simple_model = SimpleModel()
-    model = LaNet()
-    run_cnn(model, epochs=2, plot=True, print_every=20, dropout=0.8, train_size=20000)
+    model = LaNetTwo()
+    run_cnn(model, epochs=10, plot=True, print_every=20, dropout=0.8, train_size=20000)
 

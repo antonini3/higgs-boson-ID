@@ -115,4 +115,57 @@ class LaNet(CNNModel):
         # Softmax
         self.y_conv=tf.nn.softmax(tf.matmul(h_fc3_drop, self._weight_variable([1024, NUM_CLASSES])) + self._bias_variable([NUM_CLASSES]))
 
+class LaNetTwo(CNNModel):
+
+    def __init__(self):
+        self.x = tf.placeholder("float", shape=[None, PADDED_IMAGE_DIMENSION])
+        self.y_ = tf.placeholder("float", shape=[None, NUM_CLASSES])
+        self.keep_prob = tf.placeholder("float")
+
+        # Batchsize, width/height, color channels
+        x_image = tf.reshape(self.x, [-1, PADDED_NUM_PIXELS, PADDED_NUM_PIXELS, 1])
+
+        # First Layer: (CONV3-32) x 2 - MAXPOOL
+        h_conv1a = tf.nn.relu(self._conv2d(x_image, self._weight_variable([3, 3, 1, 32])) + self._bias_variable([32]))
+        h_conv1b = tf.nn.relu(self._conv2d(h_conv1a, self._weight_variable([3, 3, 32, 32])) + self._bias_variable([32]))
+        h_conv1c = tf.nn.relu(self._conv2d(h_conv1b, self._weight_variable([3, 3, 32, 32])) + self._bias_variable([32]))
+        h_pool1 = self._max_pool_2x2(h_conv1c)
+
+        # Second Layer: (CONV3-64) x 2 - MAXPOOL
+        h_conv2a = tf.nn.relu(self._conv2d(h_pool1, self._weight_variable([3, 3, 32, 64])) + self._bias_variable([64]))
+        h_conv2b = tf.nn.relu(self._conv2d(h_conv2a, self._weight_variable([3, 3, 64, 64])) + self._bias_variable([64]))
+        h_conv2c = tf.nn.relu(self._conv2d(h_conv2b, self._weight_variable([3, 3, 64, 64])) + self._bias_variable([64]))
+        h_pool2 = self._max_pool_2x2(h_conv2c)
+
+        # Third Layer: (CONV3-128) x 3 - MAXPOOL
+        h_conv3a = tf.nn.relu(self._conv2d(h_pool2, self._weight_variable([3, 3, 64, 128])) + self._bias_variable([128]))
+        h_conv3b = tf.nn.relu(self._conv2d(h_conv3a, self._weight_variable([3, 3, 128, 128])) + self._bias_variable([128]))
+        h_conv3c = tf.nn.relu(self._conv2d(h_conv3b, self._weight_variable([3, 3, 128, 128])) + self._bias_variable([128]))
+        h_pool3 = self._max_pool_2x2(h_conv3c)
+
+        # Fourth Layer: (CONV3-256) x 3 - MAXPOOL
+        h_conv4a = tf.nn.relu(self._conv2d(h_pool3, self._weight_variable([3, 3, 128, 256])) + self._bias_variable([256]))
+        h_conv4b = tf.nn.relu(self._conv2d(h_conv4a, self._weight_variable([3, 3, 256, 256])) + self._bias_variable([256]))
+        h_conv4c = tf.nn.relu(self._conv2d(h_conv4b, self._weight_variable([3, 3, 256, 256])) + self._bias_variable([256]))
+        h_pool4 = self._max_pool_2x2(h_conv4c)
+
+
+        # Fifth Layer: (CONV3-512) x 3 - MAXPOOL
+        h_conv5a = tf.nn.relu(self._conv2d(h_pool4, self._weight_variable([1, 1, 256, 512])) + self._bias_variable([512]))
+        h_conv5b = tf.nn.relu(self._conv2d(h_conv5a, self._weight_variable([1, 1, 512, 512])) + self._bias_variable([512]))
+        h_conv5c = tf.nn.relu(self._conv2d(h_conv5b, self._weight_variable([1, 1, 512, 512])) + self._bias_variable([512]))
+        h_pool5 = self._max_pool_2x2(h_conv5c)
+
+        # Fully Connected: 4096 - 4096 - 1000
+        h_pool5_flat = tf.reshape(h_pool5, [-1, 1 * 1 * 512])
+        h_fc1 = tf.nn.relu(tf.matmul(h_pool5_flat, self._weight_variable([1 * 1 * 512, 4096])) + self._bias_variable([4096]))
+        h_fc1_drop = tf.nn.dropout(h_fc1, self.keep_prob)
+        h_fc2 = tf.nn.relu(tf.matmul(h_fc1_drop, self._weight_variable([4096, 4096])) + self._bias_variable([4096]))
+        h_fc2_drop = tf.nn.dropout(h_fc2, self.keep_prob)
+        h_fc3 = tf.nn.relu(tf.matmul(h_fc2_drop, self._weight_variable([4096, 1024])) + self._bias_variable([1024]))
+        h_fc3_drop = tf.nn.dropout(h_fc3, self.keep_prob)
+
+        # Softmax
+        self.y_conv=tf.nn.softmax(tf.matmul(h_fc3_drop, self._weight_variable([1024, NUM_CLASSES])) + self._bias_variable([NUM_CLASSES]))
+
         
