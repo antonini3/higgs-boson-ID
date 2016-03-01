@@ -49,11 +49,8 @@ def cnn_preprocessing(train_size=None):
 
     return x_train, x_test, x_val, y_train, y_test, y_val
 
-
-
-
-def run_cnn(model, learning_rate=1e-4, batch_size=32, epochs=20, dropout=1.0, print_every=50, plot=False, train_size=None):
-    '''
+'''
+def run_cnn(model, learning_rate=1e-4, decay=0.95, batch_size=32, epochs=20, dropout=1.0, print_every=50, plot=False, train_size=None):
     sess = tf.InteractiveSession()
     x_train, x_test, x_val, y_train, y_test, y_val = cnn_preprocessing(train_size=train_size)
 
@@ -114,8 +111,3 @@ if __name__ == '__main__':
     print(tpr)
     plot_roc(y_test_true, prob_one, name='LaNet')
     plt.show()
-    '''
-    simple_model = SimpleModel()
-    model = LaNet()
-    run_cnn(model, epochs=200, learning_rate=1e-4, plot=True, print_every=200, dropout=0.5)
-    '''
