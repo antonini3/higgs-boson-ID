@@ -165,7 +165,9 @@ def setup_figure():
 
 
 def plot_roc(y_test, y_probs, name):
-	fpr, tpr, threshold = roc_curve(y_test, y_probs[:,1])
+	if isinstance(y_probs[0], list):
+		y_probs = y_probs[:,1]
+	fpr, tpr, threshold = roc_curve(y_test, y_probs)
 	roc_auc = auc(fpr, tpr)
 	print "ROC:", roc_auc
 	fig = plt.plot(fpr, tpr, label=name + ' (area = %0.3f)' % roc_auc)
