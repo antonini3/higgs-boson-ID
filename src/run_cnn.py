@@ -1,4 +1,3 @@
-
 # coding: utf-8
 
 ## Setup
@@ -50,7 +49,7 @@ def cnn_preprocessing(train_size=None):
 
 
 
-def run_cnn(model, learning_rate=1e-4, decay=0.95, batch_size=32, epochs=20, dropout=1.0, print_every=50, plot=False, train_size=None):
+def run_cnn(model, learning_rate=1e-4, batch_size=32, epochs=20, dropout=1.0, print_every=50, plot=False, train_size=None, decay=1.0):
     sess = tf.InteractiveSession()
     x_train, x_test, x_val, y_train, y_test, y_val = cnn_preprocessing(train_size=train_size)
 
@@ -74,8 +73,9 @@ def run_cnn(model, learning_rate=1e-4, decay=0.95, batch_size=32, epochs=20, dro
                 train_accuracy = accuracy.eval(feed_dict={ model.x:x_batch, model.y_: y_batch, model.keep_prob: 1.0})
                 print("     Step: %d, Training accuracy: %f"%(i, train_accuracy))
             train_step.run(feed_dict={model.x: x_batch, model.y_: y_batch, model.keep_prob: dropout})
-        val_acc = accuracy.eval(feed_dict={model.x: x_val, model.y_: y_val, model.keep_prob: 1.0})
+        val_acc = np.mean([accuracy.eval(feed_dict={model.x: [x_i], model.y_: [y_i], model.keep_prob: 1.0}) for x_i, y_i in zip(x_val, y_val)])
         accuracies.append(val_acc)
+        learning_rate *= decay
         print("  Validation accuracy: %g"%val_acc)
 
     print("Final test accuracy: %g"%accuracy.eval(feed_dict={model.x: x_test, model.y_: y_test, model.keep_prob: 1.0}))
@@ -88,5 +88,5 @@ def run_cnn(model, learning_rate=1e-4, decay=0.95, batch_size=32, epochs=20, dro
 if __name__ == '__main__':
     simple_model = SimpleModel()
     model = LaNetTwo()
-    run_cnn(model, epochs=10, plot=True, print_every=20, dropout=0.8, train_size=20000)
-
+    print 'LaNetTwo epochs=200, learning_rate=1e-4, plot=True, print_every=100, dropout=1.0, decay=0.90, train_size=20000'
+    run_cnn(model, epochs=200, learning_rate=1e-4, plot=True, print_every=100, dropout=1.0, decay=0.90, train_size=20000)

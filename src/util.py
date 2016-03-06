@@ -153,7 +153,7 @@ def read_pull(filename):
 		return np.asarray(l)
 
 	if 'withpull' in filename:
-		return np.asarray([np.asarray(x.split()).astype(float)[:2] for x in open(filename)])
+		return np.asarray([np.asarray(x.split()).astype(float)[0:1] for x in open(filename)])
 	else:
 		print "No pull in this file"
 
@@ -164,8 +164,11 @@ def setup_figure():
 	plt.figure()
 
 
-def plot_roc(y_test, y_probs, name):
+def plot_roc(y_test, y_probs, name, save=False):
 	fpr, tpr, threshold = roc_curve(y_test, y_probs[:,1])
+	if save:
+		np.save(open('../roc_data/_fpr', 'wb'), fpr)
+		np.save(open('../roc_data/_tpr', 'wb'), tpr)
 	roc_auc = auc(fpr, tpr)
 	print "ROC:", roc_auc
 	fig = plt.plot(fpr, tpr, label=name + ' (area = %0.3f)' % roc_auc)
