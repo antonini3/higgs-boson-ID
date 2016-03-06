@@ -165,7 +165,9 @@ def setup_figure():
 
 
 def plot_roc(y_test, y_probs, name, save=False):
-	fpr, tpr, threshold = roc_curve(y_test, y_probs[:,1])
+	if isinstance(y_probs[0], list):
+		y_probs = y_probs[:,1]
+	fpr, tpr, threshold = roc_curve(y_test, y_probs)
 	if save:
 		np.save(open('../roc_data/_fpr', 'wb'), fpr)
 		np.save(open('../roc_data/_tpr', 'wb'), tpr)
