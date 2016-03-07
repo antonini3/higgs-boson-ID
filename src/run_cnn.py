@@ -101,8 +101,8 @@ if __name__ == '__main__':
     train_size = None
     x_train, x_test, x_val, y_train, y_test, y_val = cnn_preprocessing(train_size=train_size)
     # model = LaNet()
-    model = SimpleModel()
-    model.fit(x_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=1, decay=0.90, print_every=200, max_epochs=20)
+    model = LaNet()
+    model.fit(x_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=.8, decay=.9, print_every=200, max_epochs=20)
     print "Training Accuracy: ", model.score(x_train, y_train)
     print "Validation Accuracy: ", model.score(x_val, y_val)
     print "Testing Accuracy: ", model.score(x_test, y_test)
