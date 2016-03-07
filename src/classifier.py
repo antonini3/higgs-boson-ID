@@ -46,6 +46,7 @@ def simple_classify(clf, pull=False, name=None, fine=False, train_size=None, sub
 		x = x_subset
 
 	x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=TEST_SET_RATIO, random_state=42)
+	
 	clf.fit(x_train, y_train)
 
 	y_hat = clf.predict(x_test)
@@ -57,7 +58,7 @@ def simple_classify(clf, pull=False, name=None, fine=False, train_size=None, sub
 	y_probs_test = clf.predict_proba(x_test)
 
 	y_probs_train = clf.predict_proba(x_train)
-	plot_roc(y_test, y_probs_test, name)
+	plot_roc(y_test, y_probs_test, name, save=True)
 
 	return accuracy_test, accuracy_train
 
@@ -82,6 +83,7 @@ def cross_validate(clf, pull=False, name=None, fine=False, k=2):
 
 def correlation_image(clf, pull=False, name=None, fine=False):
 	x, y = preprocessing(pull=pull, fine=fine)
+	
 	x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=TEST_SET_RATIO, random_state=42)
 	clf.fit(x, y)
 	decision_function = clf.decision_function(x)
@@ -93,7 +95,6 @@ def correlation_image(clf, pull=False, name=None, fine=False):
 		
 def preprocessing(pull=False, fine=False, train_size=None):
 	higgs_data, not_higgs_data = get_data(pull, fine)
-
 	higgs_data = zip(higgs_data, [1] * len(higgs_data))
 	not_higgs_data = zip(not_higgs_data, [0] * len(not_higgs_data))
 
@@ -108,15 +109,16 @@ def preprocessing(pull=False, fine=False, train_size=None):
 
 if __name__ == '__main__':
 
-	# setup_figure()
+	setup_figure()
 
 	classifier = AdaBoostClassifier(n_estimators=100, base_estimator=RandomForestClassifier(max_depth=11, n_estimators=50, max_features=100))
-	crappy_classifier = AdaBoostClassifier(n_estimators=1, base_estimator=RandomForestClassifier(max_depth=1, n_estimators=1))
-	# simple_classify(classifier, pull=False, fine=False, name="Adaboost")
-	cross_validate(classifier, k=5)
+	# crappy_classifier = AdaBoostClassifier(n_estimators=1, base_estimator=RandomForestClassifier(max_depth=1, n_estimators=1))
+	# cross_validate(classifier, k=5)
+
+	simple_classify(classifier, pull=False, fine=False, name="QDA")
 	# correlation_image(classifier)
 
 
-	# plot_show()
+	plot_show()
 
 

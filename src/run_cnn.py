@@ -1,4 +1,3 @@
-
 # coding: utf-8
 
 ## Setup
@@ -58,6 +57,7 @@ def cnn_preprocessing(train_size=None):
 if __name__ == '__main__':
     train_size = None
     x_train, x_test, x_val, y_train, y_test, y_val = cnn_preprocessing(train_size=train_size)
+
     model = SimpleModel()
     model.fit(x_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=0.8, decay=0.90, print_every=200, max_epochs=10)
     print "Training Accuracy: ", model.score(x_train, y_train)
