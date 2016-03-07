@@ -174,9 +174,6 @@ def plot_roc(y_test, y_probs, name, save=False):
 	roc_auc = auc(fpr, tpr)
 	print "ROC:", roc_auc
 	fig = plt.plot(fpr, tpr, label=name + ' (area = %0.3f)' % roc_auc)
-	# x = np.arange(0.00001, 1, 0.001)
-	# y = 1/x
-	# plt.plot(x, y, 'k--')
 	plt.xlim([0.0, 1.0])
 	plt.ylim([0.0, 1.0])
 	plt.xlabel('False positive rate')
