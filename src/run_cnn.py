@@ -10,6 +10,7 @@ from cnn_models import *
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
+import json
 
 
 np.set_printoptions(threshold='nan')
@@ -49,65 +50,20 @@ def cnn_preprocessing(train_size=None):
 
     return x_train, x_test, x_val, y_train, y_test, y_val
 
-'''
-def run_cnn(model, learning_rate=1e-4, decay=0.95, batch_size=32, epochs=20, dropout=1.0, print_every=50, plot=False, train_size=None):
-    sess = tf.InteractiveSession()
-    x_train, x_test, x_val, y_train, y_test, y_val = cnn_preprocessing(train_size=train_size)
-
-    cross_entropy = -tf.reduce_sum(model.y_*tf.log(model.y_conv + 1e-7))
-    train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
-    correct_prediction = tf.equal(tf.argmax(model.y_conv,1), tf.argmax(model.y_,1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-    sess.run(tf.initialize_all_variables())
-
-    accuracies = []
-
-    for j in xrange(epochs):
-        print "Epoch number:", j + 1
-        num_batches = max(x_train.shape[0] // batch_size, 1)
-        x_epoch, y_epoch = permute(x_train, y_train)
-        print "  Number of batches:", num_batches
-        for i in xrange(num_batches):
-            x_batch, y_batch = x_epoch[i * batch_size : (i + 1) * batch_size], y_epoch[i * batch_size : (i + 1) * batch_size]
-            assert(len(x_batch) != 0)
-            if i > 0 and i % print_every == 0:
-                train_accuracy = accuracy.eval(feed_dict={ model.x:x_batch, model.y_: y_batch, model.keep_prob: 1.0})
-                print("     Step: %d, Training accuracy: %f"%(i, train_accuracy))
-            train_step.run(feed_dict={model.x: x_batch, model.y_: y_batch, model.keep_prob: dropout})
-        val_acc = np.mean([accuracy.eval(feed_dict={model.x: [x_i], model.y_: [y_i], model.keep_prob: 1.0}) for x_i, y_i in zip(x_val, y_val)])
-        print("  Validation accuracy: %g"%val_acc)
-        accuracies.append(val_acc)
-        if j > 1:
-            average_last_accuracy = np.mean([accuracies[j], accuracies[j-1]])
-            print "  Average Validation Accuracy from epoch {0} and {1}: {2}".format(j, j-1, average_last_accuracy)
-            accuracy_difference = abs(average_last_accuracy - val_acc)
-            print "  Difference in accuracies: {0}".format(accuracy_difference)
-            if accuracy_difference < 0.008:
-                learning_rate *= 0.5
-                print "  new learning rate: {0}".format(learning_rate)
-
-    print("Final test accuracy: %g"%accuracy.eval(feed_dict={model.x: x_test, model.y_: y_test, model.keep_prob: 1.0}))
-
-    if plot:
-        our_plot(range(1, epochs+1), [accuracies])
-    '''
-
+    def get_roc_data(predictions):
+        prob_one = [pred[1] for pred in predictions]
+        y_test_true = [np.argmax(y_i) for y_i in y_test]
+        fpr, tpr, threshold = roc_curve(y_test_true, prob_one)
 
 if __name__ == '__main__':
     train_size = None
     x_train, x_test, x_val, y_train, y_test, y_val = cnn_preprocessing(train_size=train_size)
-    model = LaNet()
-    model.fit(x_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=1, decay=0.90, print_every=200, max_epochs=20)
+    model = SimpleModel()
+    model.fit(x_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=0.8, decay=0.90, print_every=200, max_epochs=10)
     print "Training Accuracy: ", model.score(x_train, y_train)
     print "Validation Accuracy: ", model.score(x_val, y_val)
     print "Testing Accuracy: ", model.score(x_test, y_test)
 
     predictions = model.predict(x_test)
 
-    prob_one = [pred[1] for pred in predictions]
-    y_test_true = [np.argmax(y_i) for y_i in y_test]
-    fpr, tpr, threshold = roc_curve(y_test_true, prob_one)
-    print(fpr)
-    print(tpr)
-    plot_roc(y_test_true, prob_one, name='LaNet')
-    plt.show()
+
