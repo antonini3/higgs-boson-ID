@@ -18,6 +18,7 @@ class CNNModel(object):
 		self.optimizer = None
 		self.minimizer = None
 		self.phase_train = tf.placeholder(tf.bool, name='phase_train')
+		self.saver = None
 
 	def _batch_norm(self, x, n_out, phase_train, scope='bn', affine=True):
 		"""
@@ -90,7 +91,7 @@ class CNNModel(object):
 			self.minimizer = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 			return self.minimizer
 
-	def fit(self, X_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=1.0, max_epochs=100, decay='drop', print_every=50, loss='cross_entropy', optimizer='Adam', minimize='accuracy', save_images=False):
+	def fit(self, X_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=1.0, max_epochs=100, decay='drop', print_every=50, loss='cross_entropy', optimizer='Adam', minimize='accuracy', save_images=False, save_file=True):
 		self.learning_rate = learning_rate
 		self.batch_size = batch_size
 		self.dropout = dropout
@@ -111,6 +112,9 @@ class CNNModel(object):
 
 		self.sess.run(tf.initialize_all_variables())
 
+		if save_file:
+			self.saver = tf.train.Saver()
+
 		scores = []
 		#iterate over epochs
 		for epoch in xrange(max_epochs):
@@ -125,11 +129,14 @@ class CNNModel(object):
 					#train_score = self.minimizer.eval(feed_dict={ model.x:x_batch, model.y_: y_batch, model.keep_prob: 1.0})
 					train_score = self.score(x_batch, y_batch)
 					print("     Step: {0}, Training {1}: {2}".format(i, minimize, train_score))
+				#train_step.run(feed_dict={self.x: x_batch, self.y_: y_batch, self.keep_prob: self.dropout, self.phase_train: True})
 				train_step.run(feed_dict={self.x: x_batch, self.y_: y_batch, self.keep_prob: self.dropout, self.phase_train: True})
 			#val_score = np.mean([self.minimizer.eval(feed_dict={model.x: [x_i], model.y_: [y_i], model.keep_prob: 1.0}) for x_i, y_i in zip(x_val, y_val)])
 			val_score = self.score(x_val, y_val)
 			print("  Validation {0}: {1}".format(minimize, val_score))
 			scores.append(val_score)
+			if save_file:
+				self.saver.save(self.sess, '../models/lanet_large.ckpt', global_step=epoch+1)
 			if save_images:
 				self._save_image_summaries(epoch)
 			if decay_type == 'exponential':
@@ -142,8 +149,7 @@ class CNNModel(object):
 				if score_difference < 0.008:
 					self.learning_rate *= 0.5
 					print "  new learning rate: {0}".format(learning_rate)
-	
-	# not implemented yet. just want forward pass -> check tensorflow documentation
+		# not implemented yet. just want forward pass -> check tensorflow documentation
 	def predict(self, X):
 		predicts = [self.sess.run(self.y_conv, feed_dict={self.x: [x_i], self.keep_prob:self.dropout, self.phase_train: False}) for x_i in X]
 		predictions = [pred[0].tolist() for pred in predicts]
@@ -222,40 +228,40 @@ class LaNet(CNNModel):
 		x_image = tf.reshape(self.x, [-1, PADDED_NUM_PIXELS, PADDED_NUM_PIXELS, 1])
 		self.x_image = x_image
 		# First Layer: (CONV3-32) x 2 - MAXPOOL
-		w_conv1a = self._weight_variable([3, 3, 1, 32])
-		h_conv1a = tf.nn.relu(self._conv2d(x_image, w_conv1a) + self._bias_variable([32]))
-		h_conv1b = tf.nn.relu(self._conv2d(h_conv1a, self._weight_variable([3, 3, 32, 32])) + self._bias_variable([32]))
+		w_conv1a = self._weight_variable([3, 3, 1, 64])
+		h_conv1a = tf.nn.relu(self._conv2d(x_image, w_conv1a) + self._bias_variable([64]))
+		h_conv1b = tf.nn.relu(self._conv2d(h_conv1a, self._weight_variable([3, 3, 64, 64])) + self._bias_variable([64]))
 		h_pool1 = self._max_pool_2x2(h_conv1b)
 
 		# Second Layer: (CONV3-64) x 2 - MAXPOOL
-		bn_conv2 = self._batch_norm(h_pool1, 32,  self.phase_train)
-		w_conv2a = self._weight_variable([3, 3, 32, 64])
+		#bn_conv2 = self._batch_norm(h_pool1, 32,  self.phase_train)
+		w_conv2a = self._weight_variable([3, 3, 64, 128])
 		# tf.image_summary('w_conv2a', tf.split(3, 64, w_conv2a))
-		h_conv2a = tf.nn.relu(self._conv2d(bn_conv2, w_conv2a) + self._bias_variable([64]))
-		h_conv2b = tf.nn.relu(self._conv2d(h_conv2a, self._weight_variable([3, 3, 64, 64])) + self._bias_variable([64]))
+		h_conv2a = tf.nn.relu(self._conv2d(h_pool1, w_conv2a) + self._bias_variable([128]))
+		h_conv2b = tf.nn.relu(self._conv2d(h_conv2a, self._weight_variable([3, 3, 128, 128])) + self._bias_variable([128]))
 		h_pool2 = self._max_pool_2x2(h_conv2b)
 
 		# Third Layer: (CONV3-128) x 3 - MAXPOOL
-		bn_conv3 = self._batch_norm(h_pool2, 64,  self.phase_train)
-		w_conv3a = self._weight_variable([3, 3, 64, 128])
+		#bn_conv3 = self._batch_norm(h_pool2, 64,  self.phase_train)
+		w_conv3a = self._weight_variable([3, 3, 128, 256])
 		
-		h_conv3a = tf.nn.relu(self._conv2d(bn_conv3, w_conv3a) + self._bias_variable([128]))
-		h_conv3b = tf.nn.relu(self._conv2d(h_conv3a, self._weight_variable([3, 3, 128, 128])) + self._bias_variable([128]))
-		h_conv3c = tf.nn.relu(self._conv2d(h_conv3b, self._weight_variable([3, 3, 128, 128])) + self._bias_variable([128]))
+		h_conv3a = tf.nn.relu(self._conv2d(h_pool2, w_conv3a) + self._bias_variable([256]))
+		h_conv3b = tf.nn.relu(self._conv2d(h_conv3a, self._weight_variable([3, 3, 256, 256])) + self._bias_variable([256]))
+		h_conv3c = tf.nn.relu(self._conv2d(h_conv3b, self._weight_variable([3, 3, 256, 256])) + self._bias_variable([256]))
 		h_pool3 = self._max_pool_2x2(h_conv3c)
 
 		# Fourth Layer: (CONV3-256) x 3 - MAXPOOL
-		bn_conv4 = self._batch_norm(h_pool3, 128,  self.phase_train)
-		w_conv4a = self._weight_variable([3, 3, 128, 256])
+		#bn_conv4 = self._batch_norm(h_pool3, 128,  self.phase_train)
+		w_conv4a = self._weight_variable([3, 3, 256, 512])
 		# tf.image_summary('w_conv4a', tf.split(3, 256, w_conv4a))
-		h_conv4a = tf.nn.relu(self._conv2d(bn_conv4, w_conv4a) + self._bias_variable([256]))
-		h_conv4b = tf.nn.relu(self._conv2d(h_conv4a, self._weight_variable([3, 3, 256, 256])) + self._bias_variable([256]))
-		h_conv4c = tf.nn.relu(self._conv2d(h_conv4b, self._weight_variable([3, 3, 256, 256])) + self._bias_variable([256]))
+		h_conv4a = tf.nn.relu(self._conv2d(h_pool3, w_conv4a) + self._bias_variable([512]))
+		h_conv4b = tf.nn.relu(self._conv2d(h_conv4a, self._weight_variable([3, 3, 512, 512])) + self._bias_variable([512]))
+		h_conv4c = tf.nn.relu(self._conv2d(h_conv4b, self._weight_variable([3, 3, 512, 512])) + self._bias_variable([512]))
 		h_pool4 = self._max_pool_2x2(h_conv4c)
 
 		# Fully Connected: 4096 - 4096 - 1000
-		h_pool4_flat = tf.reshape(h_pool4, [-1, 2 * 2 * 256])
-		h_fc1 = tf.nn.relu(tf.matmul(h_pool4_flat, self._weight_variable([2 * 2 * 256, 4096])) + self._bias_variable([4096]))
+		h_pool4_flat = tf.reshape(h_pool4, [-1, 2 * 2 * 512])
+		h_fc1 = tf.nn.relu(tf.matmul(h_pool4_flat, self._weight_variable([2 * 2 * 512, 4096])) + self._bias_variable([4096]))
 		h_fc1_drop = tf.nn.dropout(h_fc1, self.keep_prob)
 		h_fc2 = tf.nn.relu(tf.matmul(h_fc1_drop, self._weight_variable([4096, 4096])) + self._bias_variable([4096]))
 		h_fc2_drop = tf.nn.dropout(h_fc2, self.keep_prob)

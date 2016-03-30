@@ -10,6 +10,8 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 import json
+from sklearn.metrics import roc_curve, auc
+
 
 
 np.set_printoptions(threshold='nan')
@@ -49,22 +51,34 @@ def cnn_preprocessing(train_size=None):
 
     return x_train, x_test, x_val, y_train, y_test, y_val
 
-    def get_roc_data(predictions):
-        prob_one = [pred[1] for pred in predictions]
-        y_test_true = [np.argmax(y_i) for y_i in y_test]
-        fpr, tpr, threshold = roc_curve(y_test_true, prob_one)
+def get_roc_data(predictions):
+    prob_one = [pred[1] for pred in predictions]
+    y_test_true = [np.argmax(y_i) for y_i in y_test]
+    fpr, tpr, threshold = roc_curve(y_test_true, prob_one)
+    auc_ = auc(fpr, tpr)
+    return fpr, tpr, auc_
 
 if __name__ == '__main__':
     train_size = None
     x_train, x_test, x_val, y_train, y_test, y_val = cnn_preprocessing(train_size=train_size)
-    # model = LaNet()
     model = LaNet()
-    model.fit(x_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=.8, decay=.9, print_every=200, max_epochs=20)
+    model.fit(x_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=1.0, decay=.9, print_every=200, max_epochs=30, save_file=True)
 
     print "Training Accuracy: ", model.score(x_train, y_train)
     print "Validation Accuracy: ", model.score(x_val, y_val)
     print "Testing Accuracy: ", model.score(x_test, y_test)
-
+    
+    '''
+    ckpt = tf.train.get_checkpoint_state("../models/")
+    if ckpt and ckpt.model_checkpoint_path:
+    self.saver.restore(self.sess, ckpt.model_checkpoint_path)
+    '''
     predictions = model.predict(x_test)
+    fpr, tpr, auc_ = get_roc_data(predictions)
+    print(fpr)
+    print(tpr)
+    print(auc_)
+
+
 
 

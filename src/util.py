@@ -195,7 +195,7 @@ def our_plot(x, ys, y_labels=None, y_label='Accuracy', x_label='Epochs', title='
 
 	plt.xlabel(x_label)
 	plt.ylabel(y_label)
-	plt.ylim([0.0, 1.0])
+	#plt.ylim([0.0, 1.0])
 	plt.legend(loc="lower right")
 	plt.title(title)
 	plt.show()
