@@ -19,6 +19,7 @@ def plot_accuracy(accuracies):
 	plt.show()
 
 def visualize_plot(arr, title=None, x_axis=None, y_axis=None):
+	fig = plt.figure()
 	matrix = array_to_numpy_matrix(arr)
 	fig = plt.figure()
 	if title is not None:
@@ -53,7 +54,7 @@ def global_maximas(arr, THRESHOLD=0.0, NUM_AROUND=1):
 	return total
 
 def array_to_matrix(arr):
-	return [[arr[i * NUM_PIXELS + j] for j in range(NUM_PIXELS)] for i in range(NUM_PIXELS)]
+	return [[arr[i * PADDED_NUM_PIXELS + j] for j in range(PADDED_NUM_PIXELS)] for i in range(PADDED_NUM_PIXELS)]
 
 def array_to_numpy_matrix(arr):
 	return np.matrix(array_to_matrix(arr)).astype(float)
