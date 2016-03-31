@@ -27,3 +27,4 @@ NOT_HIGGS_FILE_NAME_W_PULL = "../data/ColorflowData_notHiggs_25x25_withpull.txt"
 FINE_HIGGS_FILE_NAME_W_PULL = "../data/ColorflowData_Higgs_fine_50k.txt"
 
 FINE_NOT_HIGGS_FILE_NAME_W_PULL = "../data/ColorflowData_NotHiggs_fine_50k.txt"
+

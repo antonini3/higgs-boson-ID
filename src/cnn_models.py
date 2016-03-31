@@ -149,7 +149,16 @@ class CNNModel(object):
 				if score_difference < 0.008:
 					self.learning_rate *= 0.5
 					print "  new learning rate: {0}".format(learning_rate)
-		# not implemented yet. just want forward pass -> check tensorflow documentation
+
+	def get_misclassification(self, X, Y):
+		return zip(X, Y)
+		misclass = []
+		for x_i, y_i in zip(X, Y):
+			if self.minimizer.eval(feed_dict={self.x: [x_i], self.y_: [y_i], self.keep_prob: 1.0, self.phase_train: False}) < 1.0:
+				# Was miclassified:
+				misclass.append((x_i, y_i))
+		return misclass
+
 	def predict(self, X):
 		predicts = [self.sess.run(self.y_conv, feed_dict={self.x: [x_i], self.keep_prob:self.dropout, self.phase_train: False}) for x_i in X]
 		predictions = [pred[0].tolist() for pred in predicts]
@@ -188,17 +197,17 @@ class SimpleModel(CNNModel):
 		super(SimpleModel, self).__init__()
 
 		# Batchsize, width/height, color channels
-		x_image = tf.reshape(self.x, [-1, PADDED_NUM_PIXELS, PADDED_NUM_PIXELS, 1])
+		self.x_image = tf.reshape(self.x, [-1, PADDED_NUM_PIXELS, PADDED_NUM_PIXELS, 1])
 
 		## 5x5 image patches, 1 color channel, 32 outputs
-		W_conv1a = self._weight_variable([5, 5, 1, 32])
+		W_conv1a = self._weight_variable([11, 11, 1, 32])
 		b_conv1a = self._bias_variable([32])
-		h_conv1a = tf.nn.relu(self._conv2d(x_image, W_conv1a) + b_conv1a)
+		h_conv1a = tf.nn.relu(self._conv2d(self.x_image, W_conv1a) + b_conv1a)
 
 		h_pool1 = self._max_pool_2x2(h_conv1a)
 
 		# Second layer
-		W_conv2a = self._weight_variable([5, 5, 32, 64])
+		W_conv2a = self._weight_variable([11, 11, 32, 64])
 		b_conv2a = self._bias_variable([64])
 		h_conv2a = tf.nn.relu(self._conv2d(h_pool1, W_conv2a) + b_conv2a)
 
