@@ -55,12 +55,12 @@ def cnn_preprocessing(train_size=None):
         fpr, tpr, threshold = roc_curve(y_test_true, prob_one)
 
 if __name__ == '__main__':
-    train_size = 10000
+    train_size = None
     x_train, x_test, x_val, y_train, y_test, y_val = cnn_preprocessing(train_size=train_size)
     # model = LaNet()
     model = SimpleModel()
     # print mc[0][1]
-    model.fit(x_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=1.0, decay=.9, print_every=50, max_epochs=30)
+    model.fit(x_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=0.5, decay=.9, print_every=250, max_epochs=15)
     # mc = model.get_misclassification(x_train, y_train)
     # np.save(open('../images/misclass', 'wb'), np.asarray(mc))
     # mc = np.load(open(open('../images/misclass', 'wb')))
