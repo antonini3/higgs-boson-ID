@@ -9,4 +9,8 @@
 *.pptx
 *.ppt
 *.SUNet
+*.edu
+*.local
+*models
+*.model
 .idea/
