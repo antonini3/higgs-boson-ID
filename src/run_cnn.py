@@ -62,11 +62,11 @@ if __name__ == '__main__':
     train_size = None
     x_train, x_test, x_val, y_train, y_test, y_val = cnn_preprocessing(train_size=train_size)
     model = LaNet()
-    model.fit(x_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=1.0, decay=.9, print_every=200, max_epochs=30, save_file=True)
+    model.fit(x_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=1.0, decay=.9, print_every=200, max_epochs=30, save_file=False)
     # model = LaNet()
-    model = SimpleModel()
+    # model = SimpleModel()
     # print mc[0][1]
-    model.fit(x_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=0.5, decay=.9, print_every=250, max_epochs=15)
+    # model.fit(x_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=0.5, decay=.9, print_every=250, max_epochs=15)
     # mc = model.get_misclassification(x_train, y_train)
     # np.save(open('../images/misclass', 'wb'), np.asarray(mc))
     # mc = np.load(open(open('../images/misclass', 'wb')))

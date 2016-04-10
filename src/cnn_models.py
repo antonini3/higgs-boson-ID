@@ -136,7 +136,7 @@ class CNNModel(object):
 			print("  Validation {0}: {1}".format(minimize, val_score))
 			scores.append(val_score)
 			if save_file:
-				self.saver.save(self.sess, '../models/lanet_large.ckpt', global_step=epoch+1)
+				self.saver.save(self.sess, '../models/lanet_large_bigfilters.ckpt', global_step=epoch+1)
 			if save_images:
 				self._save_image_summaries(epoch)
 			if decay_type == 'exponential':
@@ -237,14 +237,14 @@ class LaNet(CNNModel):
 		x_image = tf.reshape(self.x, [-1, PADDED_NUM_PIXELS, PADDED_NUM_PIXELS, 1])
 		self.x_image = x_image
 		# First Layer: (CONV3-32) x 2 - MAXPOOL
-		w_conv1a = self._weight_variable([3, 3, 1, 64])
+		w_conv1a = self._weight_variable([11, 11, 1, 64])
 		h_conv1a = tf.nn.relu(self._conv2d(x_image, w_conv1a) + self._bias_variable([64]))
 		h_conv1b = tf.nn.relu(self._conv2d(h_conv1a, self._weight_variable([3, 3, 64, 64])) + self._bias_variable([64]))
 		h_pool1 = self._max_pool_2x2(h_conv1b)
 
 		# Second Layer: (CONV3-64) x 2 - MAXPOOL
 		#bn_conv2 = self._batch_norm(h_pool1, 32,  self.phase_train)
-		w_conv2a = self._weight_variable([3, 3, 64, 128])
+		w_conv2a = self._weight_variable([11, 11, 64, 128])
 		# tf.image_summary('w_conv2a', tf.split(3, 64, w_conv2a))
 		h_conv2a = tf.nn.relu(self._conv2d(h_pool1, w_conv2a) + self._bias_variable([128]))
 		h_conv2b = tf.nn.relu(self._conv2d(h_conv2a, self._weight_variable([3, 3, 128, 128])) + self._bias_variable([128]))
@@ -252,7 +252,7 @@ class LaNet(CNNModel):
 
 		# Third Layer: (CONV3-128) x 3 - MAXPOOL
 		#bn_conv3 = self._batch_norm(h_pool2, 64,  self.phase_train)
-		w_conv3a = self._weight_variable([3, 3, 128, 256])
+		w_conv3a = self._weight_variable([7, 7, 128, 256])
 		
 		h_conv3a = tf.nn.relu(self._conv2d(h_pool2, w_conv3a) + self._bias_variable([256]))
 		h_conv3b = tf.nn.relu(self._conv2d(h_conv3a, self._weight_variable([3, 3, 256, 256])) + self._bias_variable([256]))
