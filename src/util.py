@@ -56,7 +56,7 @@ def correlation_plot(images, nn_output):
 		matrix = array_to_numpy_matrix(higgs_correlation_image)
 
 	new_matrix = matrix[3:-4, 3:-4]
-	visualize_heatmap(new_matrix.reshape(-1, ).tolist()[0])
+	visualize_heatmap(new_matrix.reshape(-1, ).tolist()[0], title="Correlation between Colorflow energy and probability of being Higgs", filename='heatmap')
 
 
 def visualize_plot(arr, title=None, x_axis=None, y_axis=None):
@@ -70,13 +70,12 @@ def visualize_plot(arr, title=None, x_axis=None, y_axis=None):
 		plt.ylabel(y_axis)
 
 	imageplot = plt.imshow(matrix, cmap=plt.get_cmap(COLOURMAP_COLOUR))
-	# plt.hist(imageplot.ravel(), bins=256, range=(0.0, 1.0), fc='k', ec='k')
 
 	plt.colorbar()
 	plt.show()
 
 
-def visualize_heatmap(arr, title=None, x_axis=None, y_axis=None):
+def visualize_heatmap(arr, title=None, x_axis=None, y_axis=None, filename=None):
 	fig, ax = plt.subplots()
 	if title is not None:
 		plt.title(title)
@@ -87,7 +86,10 @@ def visualize_heatmap(arr, title=None, x_axis=None, y_axis=None):
 	heatmap = ax.pcolor(np.asarray(arr).reshape(NUM_PIXELS, NUM_PIXELS), cmap=plt.get_cmap(COLOURMAP_COLOUR))
 	cbar = plt.colorbar(heatmap)
 
-	plt.show()
+	if filename is None:
+		plt.show()
+	else:
+		plt.savefig(filename + '.png', format='png')
 
 def global_maximas(arr, THRESHOLD=0.0, NUM_AROUND=1):
 	matrix = array_to_matrix(arr)
