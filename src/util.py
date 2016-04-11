@@ -5,8 +5,11 @@ import numpy as np
 import matplotlib as ml
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
+from scipy.stats.stats import pearsonr
+import math
+
 # import cv2
-import scipy
+
 
 import sys
 
@@ -18,20 +21,72 @@ def plot_accuracy(accuracies):
 	plt.title('Features by importance and accuracy they add')
 	plt.show()
 
+def correlation_plot(images, nn_output):
+	nn_output_numpy = np.asarray(nn_output)
+	higgs_indices = list(np.where(nn_output_numpy[:,1] > 0.5)[0])
+	non_higgs_indices = [i for i in xrange(len(nn_output)) if i not in set(higgs_indices)]
+
+	higgs_probabilities = nn_output_numpy[higgs_indices,:][:,1]
+	non_higgs_probabilities = nn_output_numpy[non_higgs_indices,:][:,0]
+
+	higgs_images = images[higgs_indices,]
+	non_higgs_images = images[non_higgs_indices,]
+
+	higgs_correlation_image = []
+	non_higgs_correlation_image = []
+	for i in xrange(higgs_images.shape[1]):
+		higgs_intensities_i = higgs_images[:,i]
+		non_higgs_intensities_i = non_higgs_images[:,i]
+		higgs_correlation_i = pearsonr(higgs_intensities_i, higgs_probabilities)[0]
+		non_higgs_correlation_i = pearsonr(non_higgs_intensities_i, non_higgs_probabilities)[0]
+
+		if np.isnan(higgs_correlation_i):
+			higgs_correlation_image.append(0)
+		else:
+			higgs_correlation_image.append(higgs_correlation_i)
+
+		if np.isnan(non_higgs_correlation_i):
+			non_higgs_correlation_image.append(0)
+		else:
+			non_higgs_correlation_image.append(non_higgs_correlation_i)
+
+	if higgs_images.shape[0] == 0:
+		matrix = array_to_numpy_matrix(non_higgs_correlation_image)
+	else:
+		matrix = array_to_numpy_matrix(higgs_correlation_image)
+
+	new_matrix = matrix[3:-4, 3:-4]
+	visualize_heatmap(new_matrix.reshape(-1, ).tolist()[0])
+
+
 def visualize_plot(arr, title=None, x_axis=None, y_axis=None):
-	fig = plt.figure()
 	matrix = array_to_numpy_matrix(arr)
-	fig = plt.figure()
+	fig = plt.plot()
 	if title is not None:
 		plt.title(title)
 	if x_axis is not None:
 		plt.xlabel(x_axis)
 	if y_axis is not None:
 		plt.ylabel(y_axis)
-	imageplot = plt.imshow(matrix, cmap=plt.get_cmap('Paired'))
+
+	imageplot = plt.imshow(matrix, cmap=plt.get_cmap(COLOURMAP_COLOUR))
 	# plt.hist(imageplot.ravel(), bins=256, range=(0.0, 1.0), fc='k', ec='k')
 
 	plt.colorbar()
+	plt.show()
+
+
+def visualize_heatmap(arr, title=None, x_axis=None, y_axis=None):
+	fig, ax = plt.subplots()
+	if title is not None:
+		plt.title(title)
+	if x_axis is not None:
+		plt.xlabel(x_axis)
+	if y_axis is not None:
+		plt.ylabel(y_axis)
+	heatmap = ax.pcolor(np.asarray(arr).reshape(NUM_PIXELS, NUM_PIXELS), cmap=plt.get_cmap(COLOURMAP_COLOUR))
+	cbar = plt.colorbar(heatmap)
+
 	plt.show()
 
 def global_maximas(arr, THRESHOLD=0.0, NUM_AROUND=1):
@@ -54,10 +109,12 @@ def global_maximas(arr, THRESHOLD=0.0, NUM_AROUND=1):
 	return total
 
 def array_to_matrix(arr):
-	return [[arr[i * PADDED_NUM_PIXELS + j] for j in range(PADDED_NUM_PIXELS)] for i in range(PADDED_NUM_PIXELS)]
+	dim = int(math.sqrt(len(arr)) + 0.5)
+	return [[arr[i * dim + j] for j in range(dim)] for i in range(dim)]
 
 def array_to_numpy_matrix(arr):
-	return np.matrix(array_to_matrix(arr)).astype(float)
+	obj = array_to_matrix(arr)
+	return np.matrix(obj).astype(float)
 
 def get_data(pull=False, fine=False):
 	if pull is False:
