@@ -28,8 +28,8 @@ from sklearn.decomposition import PCA, FastICA
 
 ''' Our final 229 classifier: AdaBoostClassifier(n_estimators=50, base_estimator=RandomForestClassifier(max_depth=11, n_estimators=50, max_features=100)) '''
 
-def simple_classify(clf, pull=False, name=None, fine=False, train_size=None, subset_size=None):
-	x, y = preprocessing(pull=pull, fine=fine)
+def simple_classify(clf, dataset='original', pull=False, name=None, train_size=None, subset_size=None, save=None):
+	x, y = preprocessing(pull=pull, dataset=dataset, train_size=train_size)
 
 	if subset_size != None:
 		clf.fit(x, y)
@@ -58,12 +58,13 @@ def simple_classify(clf, pull=False, name=None, fine=False, train_size=None, sub
 	y_probs_test = clf.predict_proba(x_test)
 
 	y_probs_train = clf.predict_proba(x_train)
-	plot_roc(y_test, y_probs_test, name, save=True)
+	print y_test.shape
+	plot_roc(y_test, y_probs_test, name, save=save)
 
 	return accuracy_test, accuracy_train
 
-def cross_validate(clf, pull=False, name=None, fine=False, k=2):
-	x, y = preprocessing(pull=pull, fine=fine)
+def cross_validate(clf, pull=False, name=None, k=2, dataset='original'):
+	x, y = preprocessing(pull=pull, dataset=dataset)
 	kf = KFold(len(x), n_folds=k)
 	auc_sum = 0.0
 	acc_sum = 0.0
@@ -81,8 +82,8 @@ def cross_validate(clf, pull=False, name=None, fine=False, k=2):
 	print "Average AUC is: {0}".format(auc_sum/k)
 	print 'Average accuracy is: {0}'.format(acc_sum/k)
 
-def correlation_image(clf, pull=False, name=None, fine=False):
-	x, y = preprocessing(pull=pull, fine=fine)
+def correlation_image(clf, pull=False, name=None, dataset='original'):
+	x, y = preprocessing(pull=pull, dataset=dataset)
 	
 	x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=TEST_SET_RATIO, random_state=42)
 	clf.fit(x, y)
@@ -93,8 +94,13 @@ def correlation_image(clf, pull=False, name=None, fine=False):
 		correlations.append(corr_i)
 	visualize_plot(correlations)
 		
-def preprocessing(pull=False, fine=False, train_size=None):
-	higgs_data, not_higgs_data = get_data(pull, fine)
+def preprocessing(dataset='original', train_size=None, pull=False):
+	higgs_file, not_higgs_file, skip = FILENAME_DICT[dataset]
+	half_train = train_size / 2 if train_size is not None else None
+	
+	higgs_data = read_higgs_data(higgs_file, max_size=half_train, skip=skip, pull=pull)
+	not_higgs_data = read_higgs_data(not_higgs_file, max_size=half_train, skip=skip, pull=pull)
+
 	higgs_data = zip(higgs_data, [1] * len(higgs_data))
 	not_higgs_data = zip(not_higgs_data, [0] * len(not_higgs_data))
 
@@ -109,16 +115,19 @@ def preprocessing(pull=False, fine=False, train_size=None):
 
 if __name__ == '__main__':
 
-	setup_figure()
+	# setup_figure()
 
-	classifier = AdaBoostClassifier(n_estimators=100, base_estimator=RandomForestClassifier(max_depth=11, n_estimators=50, max_features=100))
-	# crappy_classifier = AdaBoostClassifier(n_estimators=1, base_estimator=RandomForestClassifier(max_depth=1, n_estimators=1))
+	# classifier = AdaBoostClassifier(n_estimators=100, base_estimator=RandomForestClassifier(max_depth=11, n_estimators=50, max_features=100))
+	classifier = AdaBoostClassifier(n_estimators=100, base_estimator=RandomForestClassifier(max_depth=11, n_estimators=50))
+	# classifier = AdaBoostClassifier(n_estimators=1, base_estimator=RandomForestClassifier(max_depth=1, n_estimators=1))
 	# cross_validate(classifier, k=5)
 
-	simple_classify(classifier, pull=False, fine=False, name="QDA")
+	simple_classify(classifier, dataset='with_mass', train_size=None, name="pull_mass", save=True, pull=True)
+	# simple_classify(classifier, dataset='with_mass', train_size=None, name="adaboost", save=True, pull=False)
+	
+
 	# correlation_image(classifier)
 
-
-	plot_show()
+	# plot_show()
 
 

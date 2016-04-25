@@ -13,18 +13,19 @@ import json
 from sklearn.metrics import roc_curve, auc
 
 
-
 np.set_printoptions(threshold='nan')
 
-def cnn_preprocessing(train_size=None):
+def cnn_preprocessing(train_size=None, dataset='original'):
+    higgs_file, not_higgs_file, skip = FILENAME_DICT[dataset]
+
     half_train = train_size / 2 if train_size is not None else None
-    higgs_data, not_higgs_data = read_higgs_data(HIGGS_FILE_NAME, max_size=half_train, skip=6), read_higgs_data(NOT_HIGGS_FILE_NAME, max_size=half_train, skip=6)
-
+    higgs_data, not_higgs_data = read_higgs_data(higgs_file, max_size=half_train, skip=skip), read_higgs_data(not_higgs_file, max_size=half_train, skip=skip)
+    
     all_data = permute_arrays(zip(higgs_data, [1] * len(higgs_data)), zip(not_higgs_data, [0] * len(not_higgs_data)))
-
     x, y = zip(*all_data)
 
     x_total, y_total = np.asarray(x), np.asarray(y)
+
 
     # Padding
     x_temp = x_total.reshape((x_total.shape[0], NUM_PIXELS, NUM_PIXELS))
@@ -60,9 +61,24 @@ def get_roc_data(predictions):
 
 if __name__ == '__main__':
     train_size = None
-    x_train, x_test, x_val, y_train, y_test, y_val = cnn_preprocessing(train_size=train_size)
+    max_epochs = 50
+    model_filename = 'final_lanet'
+    load_model = False
+    dataset = 'with_mass'
+    x_train, x_test, x_val, y_train, y_test, y_val = cnn_preprocessing(train_size=train_size, dataset=dataset)
     model = LaNet()
-    model.fit(x_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=1.0, decay=.9, print_every=200, max_epochs=30, save_file=False)
+    model.fit(x_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=1.0, decay=.9, print_every=300, max_epochs=max_epochs, model_filename=model_filename, load_model=load_model)
+    
+
+    print "Training Accuracy: ", model.score(x_train, y_train)
+    print "Validation Accuracy: ", model.score(x_val, y_val)
+    print "Testing Accuracy: ", model.score(x_test, y_test)
+    
+
+
+
+
+
     # model = LaNet()
     # model = SimpleModel()
     # print mc[0][1]
@@ -74,20 +90,18 @@ if __name__ == '__main__':
     #     print np.argmax(mc[i][1])
     #     visualize_plot(mc[i][0])
 
-    print "Training Accuracy: ", model.score(x_train, y_train)
-    print "Validation Accuracy: ", model.score(x_val, y_val)
-    print "Testing Accuracy: ", model.score(x_test, y_test)
-    
-    '''
-    ckpt = tf.train.get_checkpoint_state("../models/")
-    if ckpt and ckpt.model_checkpoint_path:
-    self.saver.restore(self.sess, ckpt.model_checkpoint_path)
-    '''
-    predictions = model.predict(x_test)
-    fpr, tpr, auc_ = get_roc_data(predictions)
-    print(fpr)
-    print(tpr)
-    print(auc_)
+    # '''
+    # ckpt = tf.train.get_checkpoint_state("../models/")
+    # if ckpt and ckpt.model_checkpoint_path:
+    # self.saver.restore(self.sess, ckpt.model_checkpoint_path)
+    # '''
+    # predictions = model.predict(x_test)
+    # fpr, tpr, auc_ = get_roc_data(predictions)
+    # print(fpr)
+    # print(tpr)
+    # print(auc_)
+
+    # correlation_plot(x_train, model.predict(x_train))
 
 
 

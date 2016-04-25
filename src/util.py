@@ -9,7 +9,10 @@ from scipy.stats.stats import pearsonr
 import math
 
 # import cv2
+from mpltools import style
+from mpltools import layout
 
+style.use('ggplot')
 
 import sys
 
@@ -56,7 +59,7 @@ def correlation_plot(images, nn_output):
 		matrix = array_to_numpy_matrix(higgs_correlation_image)
 
 	new_matrix = matrix[3:-4, 3:-4]
-	visualize_heatmap(new_matrix.reshape(-1, ).tolist()[0], title="Correlation between Colorflow energy and probability of being Higgs", filename='heatmap')
+	visualize_heatmap(new_matrix.reshape(-1, ).tolist()[0], x_axis='$\eta$', y_axis='$\phi$', filename='../images/correlation_heatmap')
 
 
 def visualize_plot(arr, title=None, x_axis=None, y_axis=None):
@@ -118,23 +121,6 @@ def array_to_numpy_matrix(arr):
 	obj = array_to_matrix(arr)
 	return np.matrix(obj).astype(float)
 
-def get_data(pull=False, fine=False):
-	if pull is False:
-		if fine is True:
-			higgs_data = read_data_without_pull(FINE_HIGGS_FILE_NAME_W_PULL)
-			not_higgs_data = read_data_without_pull(FINE_NOT_HIGGS_FILE_NAME_W_PULL)
-		else:
-			higgs_data = read_data_without_pull(HIGGS_FILE_NAME_W_PULL)
-			not_higgs_data = read_data_without_pull(NOT_HIGGS_FILE_NAME_W_PULL)
-	else:
-		if fine is True:
-			higgs_data = read_pull(FINE_HIGGS_FILE_NAME_W_PULL)
-			not_higgs_data = read_pull(FINE_NOT_HIGGS_FILE_NAME_W_PULL)
-		else:
-			higgs_data = read_pull(HIGGS_FILE_NAME_W_PULL)
-			not_higgs_data = read_pull(NOT_HIGGS_FILE_NAME_W_PULL)
-	return higgs_data, not_higgs_data
-
 def read_data(filename):
 	return np.asarray([np.asarray(x.split()).astype(float) for x in open(filename)])
 
@@ -159,12 +145,12 @@ def scatter_plot(x, y, dec_boundry=None):
 	plt.scatter(x_1_higgs, x_2_higgs, color='green')
 	plt.scatter(x_1_non_higgs, x_2_non_higgs, color='blue')
 
-def read_higgs_data(filename, max_size=None, skip=0):
+def read_higgs_data(filename, max_size=None, skip=0, pull=False):
 	l = []
 	with open(filename) as f:
 		for i, x in enumerate(f):
-			x_array = x.split()[skip:]
-			if len(x_array) < IMG_DIMENSION:
+			x_array = x.split()[skip:] if not pull else x.split()[:skip]
+			if not pull and len(x_array) < IMG_DIMENSION:
 				x_array.insert(0, 0.)
 			
 			l.append(np.asarray(x_array, dtype=float))
@@ -175,48 +161,6 @@ def read_higgs_data(filename, max_size=None, skip=0):
 				break
 	return np.asarray(l)
 
-
-def read_data_without_pull(filename):
-	if 'fine' in filename:
-		l = []
-		i = 0
-		with open(filename) as f:
-			for x in f:
-				i+= 1
-				a = x.split()
-				l.append(np.asarray(a).astype(float)[5:])
-				sys.stdout.write("Progress from {0}: {1} \r".format(filename, i))
-				sys.stdout.flush()
-				if i > M:
-					print i
-					break
-		return np.asarray(l)
-
-	elif 'withpull' in filename:
-		num_skipped = 2
- 		return np.asarray([np.asarray(x.split()).astype(float)[num_skipped:] for x in open(filename)])
- 	else:
- 		print "No pull in this file"
-	
-def read_pull(filename):
-	if 'fine' in filename:
-		l = []
-		i = 0
-		with open(filename) as f:
-			for x in f:
-				i+= 1
-				l.append(np.asarray(x.split()).astype(float)[:5])
-				sys.stdout.write("Progress from {0}: {1} \r".format(filename, i))
-				sys.stdout.flush()
-				if i > M:
-					break
-		return np.asarray(l)
-
-	if 'withpull' in filename:
-		return np.asarray([np.asarray(x.split()).astype(float)[0:1] for x in open(filename)])
-	else:
-		print "No pull in this file"
-
 def permute_arrays(arr1, arr2):
 	return np.random.permutation(np.concatenate((arr1, arr2)))
 
@@ -225,12 +169,12 @@ def setup_figure():
 
 
 def plot_roc(y_test, y_probs, name, save=False):
-	if isinstance(y_probs[0], list):
+	if isinstance(y_probs[0], list) or isinstance(y_probs[0], np.ndarray):
 		y_probs = y_probs[:,1]
 	fpr, tpr, threshold = roc_curve(y_test, y_probs)
 	if save:
-		np.save(open('../roc_data/_fpr', 'wb'), fpr)
-		np.save(open('../roc_data/_tpr', 'wb'), tpr)
+		np.save(open('../roc_data/{0}_fpr'.format(name), 'wb'), fpr)
+		np.save(open('../roc_data/{0}_tpr'.format(name), 'wb'), tpr)
 	roc_auc = auc(fpr, tpr)
 	print "ROC:", roc_auc
 	fig = plt.plot(fpr, tpr, label=name + ' (area = %0.3f)' % roc_auc)

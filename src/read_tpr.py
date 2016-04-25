@@ -161,9 +161,9 @@ def plot_no_overfitting():
 	plt.legend(loc="lower right")
 	plt.show()
 if __name__ == '__main__':
-	# read()
+	read()
 	# plot_peter()
-	plot_no_overfitting()
+	# plot_no_overfitting()
 
 
 # plt.plot(np.load(), np.load(open('../roc_data/pull_tpr', 'rb')), label='FDA on pull data (area = %0.3f)' % auc(np.load(open('../roc_data/pull_fpr', 'rb')), np.load(open('../roc_data/pull_tpr', 'rb'))))

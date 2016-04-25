@@ -5,6 +5,8 @@ from classifier import *
 import tensorflow as tf
 import numpy as np
 from tensorflow.python import control_flow_ops
+from os import listdir
+from os.path import isfile, join
 
 class CNNModel(object):
 
@@ -91,7 +93,7 @@ class CNNModel(object):
 			self.minimizer = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 			return self.minimizer
 
-	def fit(self, X_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=1.0, max_epochs=100, decay='drop', print_every=50, loss='cross_entropy', optimizer='Adam', minimize='accuracy', save_images=False, save_file=True):
+	def fit(self, X_train, y_train, x_val, y_val, learning_rate=1e-4, batch_size=32, dropout=1.0, max_epochs=100, decay='drop', print_every=50, loss='cross_entropy', optimizer='Adam', minimize='accuracy', save_images=False, model_filename=None, load_model=False):
 		self.learning_rate = learning_rate
 		self.batch_size = batch_size
 		self.dropout = dropout
@@ -112,8 +114,17 @@ class CNNModel(object):
 
 		self.sess.run(tf.initialize_all_variables())
 
-		if save_file:
+			
+
+		if model_filename:
 			self.saver = tf.train.Saver()
+			if load_model:
+				dir = '../models/'
+				files = sorted([f for f in listdir(dir) if isfile(join(dir, f)) and f.startswith(model_filename)])
+				if len(files) == 0:
+					print 'No models of this name or nature.'
+					return
+				self.saver.restore(self.sess, join(dir, files[-1]))
 
 		scores = []
 		#iterate over epochs
@@ -126,17 +137,15 @@ class CNNModel(object):
 				x_batch, y_batch = x_epoch[i * batch_size : (i + 1) * batch_size], y_epoch[i * batch_size : (i + 1) * batch_size]
 				assert(len(x_batch) != 0)
 				if i > 0 and i % print_every == 0:
-					#train_score = self.minimizer.eval(feed_dict={ model.x:x_batch, model.y_: y_batch, model.keep_prob: 1.0})
 					train_score = self.score(x_batch, y_batch)
 					print("     Step: {0}, Training {1}: {2}".format(i, minimize, train_score))
-				#train_step.run(feed_dict={self.x: x_batch, self.y_: y_batch, self.keep_prob: self.dropout, self.phase_train: True})
 				train_step.run(feed_dict={self.x: x_batch, self.y_: y_batch, self.keep_prob: self.dropout, self.phase_train: True})
-			#val_score = np.mean([self.minimizer.eval(feed_dict={model.x: [x_i], model.y_: [y_i], model.keep_prob: 1.0}) for x_i, y_i in zip(x_val, y_val)])
+
 			val_score = self.score(x_val, y_val)
 			print("  Validation {0}: {1}".format(minimize, val_score))
 			scores.append(val_score)
-			if save_file:
-				self.saver.save(self.sess, '../models/lanet_large_bigfilters.ckpt', global_step=epoch+1)
+			if model_filename:
+				self.saver.save(self.sess, '../models/{0}.ckpt'.format(model_filename), global_step=epoch+1)
 			if save_images:
 				self._save_image_summaries(epoch)
 			if decay_type == 'exponential':
@@ -159,9 +168,11 @@ class CNNModel(object):
 				misclass.append((x_i, y_i))
 		return misclass
 
-	def predict(self, X):
+	def predict(self, X, save_file=None):
 		predicts = [self.sess.run(self.y_conv, feed_dict={self.x: [x_i], self.keep_prob:self.dropout, self.phase_train: False}) for x_i in X]
 		predictions = [pred[0].tolist() for pred in predicts]
+		if save_file:
+			np.save('../probs/{0}'.format(save_file), predictions)
 		return predictions
 
 	def score(self, X_test, y_test):
@@ -237,14 +248,14 @@ class LaNet(CNNModel):
 		x_image = tf.reshape(self.x, [-1, PADDED_NUM_PIXELS, PADDED_NUM_PIXELS, 1])
 		self.x_image = x_image
 		# First Layer: (CONV3-32) x 2 - MAXPOOL
-		w_conv1a = self._weight_variable([11, 11, 1, 64])
+		w_conv1a = self._weight_variable([3, 3, 1, 64])
 		h_conv1a = tf.nn.relu(self._conv2d(x_image, w_conv1a) + self._bias_variable([64]))
 		h_conv1b = tf.nn.relu(self._conv2d(h_conv1a, self._weight_variable([3, 3, 64, 64])) + self._bias_variable([64]))
 		h_pool1 = self._max_pool_2x2(h_conv1b)
 
 		# Second Layer: (CONV3-64) x 2 - MAXPOOL
 		#bn_conv2 = self._batch_norm(h_pool1, 32,  self.phase_train)
-		w_conv2a = self._weight_variable([11, 11, 64, 128])
+		w_conv2a = self._weight_variable([3, 3, 64, 128])
 		# tf.image_summary('w_conv2a', tf.split(3, 64, w_conv2a))
 		h_conv2a = tf.nn.relu(self._conv2d(h_pool1, w_conv2a) + self._bias_variable([128]))
 		h_conv2b = tf.nn.relu(self._conv2d(h_conv2a, self._weight_variable([3, 3, 128, 128])) + self._bias_variable([128]))
@@ -252,7 +263,7 @@ class LaNet(CNNModel):
 
 		# Third Layer: (CONV3-128) x 3 - MAXPOOL
 		#bn_conv3 = self._batch_norm(h_pool2, 64,  self.phase_train)
-		w_conv3a = self._weight_variable([7, 7, 128, 256])
+		w_conv3a = self._weight_variable([3, 3, 128, 256])
 		
 		h_conv3a = tf.nn.relu(self._conv2d(h_pool2, w_conv3a) + self._bias_variable([256]))
 		h_conv3b = tf.nn.relu(self._conv2d(h_conv3a, self._weight_variable([3, 3, 256, 256])) + self._bias_variable([256]))

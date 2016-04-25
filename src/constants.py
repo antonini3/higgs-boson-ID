@@ -30,3 +30,10 @@ FINE_HIGGS_FILE_NAME_W_PULL = "../data/ColorflowData_Higgs_fine_50k.txt"
 
 FINE_NOT_HIGGS_FILE_NAME_W_PULL = "../data/ColorflowData_NotHiggs_fine_50k.txt"
 
+
+HIGGS_FILE_W_MASS = '../data/ColorflowData_Masses_Higgs.txt'
+
+NOT_HIGGS_FILE_W_MASS = '../data/ColorflowData_Masses_NotHiggs.txt'
+
+FILENAME_DICT = {	'original' : (HIGGS_FILE_NAME, NOT_HIGGS_FILE_NAME, 6),
+					'with_mass' : (HIGGS_FILE_W_MASS, NOT_HIGGS_FILE_W_MASS, 9)}
