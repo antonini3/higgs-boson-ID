@@ -80,7 +80,7 @@ class Formatter(object):
 
 if __name__ == '__main__':
     formatter = Formatter(verbose=True, delta_r=True)
-    formatter.format([('Singlet_Rotated_withDR.txt', True), ('Octet_Rotated_withDR.txt', False)], 'rotated_sample', limit=100)
+    formatter.format([('Singlet_Rotated_withDR_new.txt', True), ('Octet_Rotated_withDR_new.txt', False)], 'rotated_sample', limit=100)
 
     # formatter = Formatter(verbose=True, delta_r=False)
     # formatter.format([('Singlet_Rotated.txt', True), ('Octet_Rotated.txt', False)], 'rotated', delta_r=False)
