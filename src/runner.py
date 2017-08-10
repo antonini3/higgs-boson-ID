@@ -48,12 +48,12 @@ class HiggsPredictor(object):
             raise Exception('Classifier does not have random search functionality.')
 
 if __name__ == '__main__':
-    dataset = Dataset('rotated', dataset_size=1000, verbose=True, r_restriction=None)
-    classifier = NeuralClassifier(dataset, verbose=True, learning_rate=1e-2, decay=0.99, hidden_layers=(64,), epochs=100, dropout=1.0)
+    dataset = Dataset('rotated_sample', verbose=True, r_restriction=None)
+    classifier = SKLClassifier(MLPClassifier, dataset)
     hp = HiggsPredictor(classifier)
     hp.classify()
 
-    # classifier = SKLClassifier(RandomForestClassifier, dataset, verbose=True, n_estimators=100)
+    # classifier = NeuralClassifier(dataset, verbose=True, learning_rate=1e-2, decay=0.99, hidden_layers=(64,), epochs=100, dropout=1.0)
     # param_dist = {"max_depth": sp_randint(12, 25),
     #           "max_features": sp_randint(6, 20),
     #           "min_samples_split": sp_randint(2, 11),

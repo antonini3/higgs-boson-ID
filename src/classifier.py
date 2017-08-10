@@ -318,6 +318,8 @@ def test_skl():
     print 'Train auc is:\t%.3f' % classifier.score(data_type='train', score_type='auc')
     print 'Validation auc is:\t%.3f' % classifier.score(data_type='val', score_type='auc')
 
+
+
 def test_nn():
     dataset = Dataset('rotated_sample', verbose=True)
     classifier = NeuralClassifier(dataset, verbose=True, learning_rate=5e-3, decay=0.99, hidden_layers=(12,), epochs=500)

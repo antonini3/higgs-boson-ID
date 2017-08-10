@@ -93,7 +93,7 @@ class Dataset(object):
 
 
     def _normalize(self):
-        train_max = np.max(np.abs(self.x_train))
+        train_max = np.max(np.abs(self.x_train)) # We may want to rethink this normalization method
         self.x_train /= train_max
         self.x_val /= train_max
         self.x_test /= train_max
